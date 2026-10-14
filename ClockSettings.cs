@@ -34,7 +34,7 @@ public sealed class ClockSettings
     // --- マウス接近時のフェード ---
     public bool ProximityEnabled { get; set; } = false;
     public int ProximityDistance { get; set; } = 100;   // 感度(判定距離 px)
-    public double ProximityOpacity { get; set; } = 1.0; // 接近時の不透明度
+    public double ProximityOpacity { get; set; } = 0.2; // 接近時の不透明度
     public int FadeDurationMs { get; set; } = 300;      // フェード時間(短い=速い)
     /// <summary>フェードのイージング: linear / easeout / easein</summary>
     public string FadeEasing { get; set; } = "easeout";
