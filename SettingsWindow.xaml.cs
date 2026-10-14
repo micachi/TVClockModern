@@ -88,7 +88,7 @@ public partial class SettingsWindow : Window
             new("crossfade", "クロスフェード"),
         };
         TransitionBox.SelectedValue = s.TransitionEffect;
-        TransitionDurationSlider.Value = Math.Clamp(s.TransitionDurationMs, 50, 1000);
+        TransitionDurationSlider.Value = Math.Clamp(s.TransitionDurationMs, 50, 500);
         OpacitySlider.Value = s.WindowOpacity;
         ShadowCheck.IsChecked = s.TextShadow;
         ShadowBlurSlider.Value = s.ShadowBlur;

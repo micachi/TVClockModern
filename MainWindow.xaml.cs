@@ -206,7 +206,7 @@ public partial class MainWindow : Window
     private static void AnimateCharChange(TextLayers layers, int index, char oldChar)
     {
         var s = App.Settings;
-        var dur = TimeSpan.FromMilliseconds(Math.Clamp(s.TransitionDurationMs, 50, 1000));
+        var dur = TimeSpan.FromMilliseconds(Math.Clamp(s.TransitionDurationMs, 50, 500));
         var half = TimeSpan.FromMilliseconds(dur.TotalMilliseconds / 2);
         var ease = new QuadraticEase { EasingMode = EasingMode.EaseOut };
 

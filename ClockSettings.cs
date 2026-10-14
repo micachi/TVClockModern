@@ -142,7 +142,7 @@ public sealed class ClockSettings
         if (!validEffects.Contains(TransitionEffect)) TransitionEffect = "crossfade";
         LetterSpacing = Math.Clamp(LetterSpacing, 0, 100);
         SeparatorSpacing = Math.Clamp(SeparatorSpacing, 0, 200);
-        TransitionDurationMs = Math.Clamp(TransitionDurationMs, 50, 1000);
+        TransitionDurationMs = Math.Clamp(TransitionDurationMs, 50, 500);
         Left = Math.Clamp(Left, -20000, 20000);
         Top = Math.Clamp(Top, -20000, 20000);
         var validPositions = new Dictionary<string, double[]>();

@@ -81,6 +81,8 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition/><RowDefinition/>
@@ -89,7 +91,7 @@
                                   SelectedValuePath="Key" DisplayMemberPath="Value"
                                   SelectionChanged="OnPreviewChanged" Margin="0,4,0,10"/>
                         <TextBlock Grid.Row="0" Grid.Column="1" Text="効果時間" VerticalAlignment="Center" Margin="8,0,0,0"/>
-                        <Slider x:Name="TransitionDurationSlider" Grid.Row="0" Grid.Column="2" Minimum="50" Maximum="1000" Width="140"
+                        <Slider x:Name="TransitionDurationSlider" Grid.Row="0" Grid.Column="2" Minimum="50" Maximum="500" Width="140"
                                 SmallChange="10" LargeChange="100" IsMoveToPointEnabled="False"
                                 ValueChanged="OnPreviewChanged" Margin="0,4,0,10"/>
                         <TextBlock x:Name="TransitionDurationValue" Grid.Row="0" Grid.Column="3" VerticalAlignment="Center" MinWidth="40" TextAlignment="Right"/>
