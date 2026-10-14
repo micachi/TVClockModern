@@ -659,7 +659,7 @@ public partial class MainWindow : Window
     {
         try
         {
-            if (!_exStyleApplied) return;
+            if (!_exStyleApplied || !IsLoaded) return; // 閉じた窓に対しては何もしない
             var hwnd = Hwnd;
             var ex = NativeMethods.GetWindowLong(hwnd, NativeMethods.GWL_EXSTYLE);
             var transparent = App.Settings.ClickThrough && !_modActive && !_menuOpen;
@@ -719,6 +719,7 @@ public partial class MainWindow : Window
 
     private void UpdateInteractionState()
     {
+        if (!IsLoaded) return; // 閉じた窓の監視は停止
         try
         {
             // モディファイアキー → クリックスルー一時解除
