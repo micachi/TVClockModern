@@ -52,6 +52,49 @@
                                    Stroke="#FF888888"/>
                     </StackPanel>
 
+                    <TextBlock Text="文字間隔 (数字同士の隙間)" FontWeight="Bold"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Slider x:Name="LetterSpacingSlider" Grid.Column="0" Minimum="0" Maximum="50"
+                                SmallChange="1" LargeChange="5" IsMoveToPointEnabled="False"
+                                Margin="0,4,0,10" ValueChanged="OnPreviewChanged"/>
+                        <TextBlock x:Name="LetterSpacingValue" Grid.Column="1" VerticalAlignment="Center" MinWidth="36" TextAlignment="Right"/>
+                    </Grid>
+
+                    <TextBlock Text="区切り間隔 (「:」の前後の隙間)" FontWeight="Bold"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Slider x:Name="SeparatorSpacingSlider" Grid.Column="0" Minimum="0" Maximum="200"
+                                SmallChange="1" LargeChange="10" IsMoveToPointEnabled="False"
+                                Margin="0,4,0,10" ValueChanged="OnPreviewChanged"/>
+                        <TextBlock x:Name="SeparatorSpacingValue" Grid.Column="1" VerticalAlignment="Center" MinWidth="36" TextAlignment="Right"/>
+                    </Grid>
+
+                    <TextBlock Text="時刻の切り替え効果" FontWeight="Bold"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/><RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <ComboBox x:Name="TransitionBox" Grid.Row="0" Grid.Column="0"
+                                  SelectedValuePath="Key" DisplayMemberPath="Value"
+                                  SelectionChanged="OnPreviewChanged" Margin="0,4,0,10"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="効果時間" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                        <Slider x:Name="TransitionDurationSlider" Grid.Row="0" Grid.Column="2" Minimum="50" Maximum="1000" Width="140"
+                                SmallChange="10" LargeChange="100" IsMoveToPointEnabled="False"
+                                ValueChanged="OnPreviewChanged" Margin="0,4,0,10"/>
+                        <TextBlock x:Name="TransitionDurationValue" Grid.Row="0" Grid.Column="3" VerticalAlignment="Center" MinWidth="40" TextAlignment="Right"/>
+                    </Grid>
+
                     <TextBlock Text="文字の縁取り" FontWeight="Bold"/>
                     <CheckBox x:Name="OutlineCheck" Content="縁取りを付ける" Checked="OnPreviewChanged" Unchecked="OnPreviewChanged" Margin="0,4,0,4"/>
                     <Grid>

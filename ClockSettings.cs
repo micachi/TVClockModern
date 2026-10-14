@@ -17,6 +17,11 @@ public sealed class ClockSettings
     public string FontFamily { get; set; } = "Yu Gothic UI";
     public double FontSize { get; set; } = 64;
     public string TextColor { get; set; } = "#FFFFFFFF";
+    public double LetterSpacing { get; set; } = 0;     // 文字間隔 (DIP)
+    public double SeparatorSpacing { get; set; } = 0;  // 区切り文字の前後間隔 (DIP)
+    /// <summary>時刻切り替え効果: none/flipx/flipy/slideup/slidedown/fade/crossfade</summary>
+    public string TransitionEffect { get; set; } = "crossfade";
+    public int TransitionDurationMs { get; set; } = 200;
     public bool TextShadow { get; set; } = true;
     public double ShadowBlur { get; set; } = 6;      // 影の大きさ(ぼかし半径)
     public double ShadowOpacity { get; set; } = 0.85; // 影の濃さ
@@ -133,6 +138,11 @@ public sealed class ClockSettings
         if (!validEasings.Contains(FadeEasing)) FadeEasing = "easeout";
         var validMods = new[] { "Ctrl", "Alt", "Shift", "None" };
         if (!validMods.Contains(ModifierKey)) ModifierKey = "Ctrl";
+        var validEffects = new[] { "none", "flipx", "flipy", "slideup", "slidedown", "fade", "crossfade" };
+        if (!validEffects.Contains(TransitionEffect)) TransitionEffect = "crossfade";
+        LetterSpacing = Math.Clamp(LetterSpacing, 0, 100);
+        SeparatorSpacing = Math.Clamp(SeparatorSpacing, 0, 200);
+        TransitionDurationMs = Math.Clamp(TransitionDurationMs, 50, 1000);
         Left = Math.Clamp(Left, -20000, 20000);
         Top = Math.Clamp(Top, -20000, 20000);
         var validPositions = new Dictionary<string, double[]>();

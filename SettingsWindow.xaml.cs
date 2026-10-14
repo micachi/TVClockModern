@@ -75,6 +75,20 @@ public partial class SettingsWindow : Window
         if (FontBox.SelectedItem is null) FontBox.Text = s.FontFamily;
 
         SizeSlider.Value = Math.Clamp(s.FontSize, 12, 200);
+        LetterSpacingSlider.Value = s.LetterSpacing;
+        SeparatorSpacingSlider.Value = s.SeparatorSpacing;
+        TransitionBox.ItemsSource = new List<KeyValuePair<string, string>>
+        {
+            new("none", "なし"),
+            new("flipx", "横に回転"),
+            new("flipy", "縦に回転"),
+            new("slideup", "せり上げ"),
+            new("slidedown", "せり下げ"),
+            new("fade", "フェードイン・アウト"),
+            new("crossfade", "クロスフェード"),
+        };
+        TransitionBox.SelectedValue = s.TransitionEffect;
+        TransitionDurationSlider.Value = Math.Clamp(s.TransitionDurationMs, 50, 1000);
         OpacitySlider.Value = s.WindowOpacity;
         ShadowCheck.IsChecked = s.TextShadow;
         ShadowBlurSlider.Value = s.ShadowBlur;
@@ -190,6 +204,9 @@ public partial class SettingsWindow : Window
 
         // 数値ラベル
         SizeValue.Text = ((int)SizeSlider.Value).ToString();
+        LetterSpacingValue.Text = LetterSpacingSlider.Value.ToString("0");
+        SeparatorSpacingValue.Text = SeparatorSpacingSlider.Value.ToString("0");
+        TransitionDurationValue.Text = TransitionDurationSlider.Value.ToString("0ms");
         OpacityValue.Text = OpacitySlider.Value.ToString("0.00");
         OutlineThicknessValue.Text = OutlineThicknessSlider.Value.ToString("0.0");
         ShadowBlurValue.Text = ShadowBlurSlider.Value.ToString("0");
@@ -251,6 +268,10 @@ public partial class SettingsWindow : Window
         s.DateFormat = DateFormatBox.Text ?? "";
         s.FontFamily = string.IsNullOrWhiteSpace(FontBox.Text) ? "Yu Gothic UI" : FontBox.Text;
         s.FontSize = SizeSlider.Value;
+        s.LetterSpacing = LetterSpacingSlider.Value;
+        s.SeparatorSpacing = SeparatorSpacingSlider.Value;
+        s.TransitionEffect = TransitionBox.SelectedValue as string ?? "crossfade";
+        s.TransitionDurationMs = (int)TransitionDurationSlider.Value;
         s.WindowOpacity = OpacitySlider.Value;
         s.TextShadow = ShadowCheck.IsChecked == true;
         s.ShadowBlur = ShadowBlurSlider.Value;

@@ -21,11 +21,6 @@ public partial class MainWindow : Window
     private bool _exStyleApplied;
 
     // 縁取り用のコピー(本体 + 8方向)
-    private readonly List<TextBlock> _timeOutline = new();
-    private TextBlock? _timeMain;
-    private readonly List<TextBlock> _dateOutline = new();
-    private TextBlock? _dateMain;
-
     public MainWindow(string monitorDevice = "")
     {
         _monitorDevice = monitorDevice;
@@ -60,7 +55,28 @@ public partial class MainWindow : Window
         };
     }
 
-    // ---------- テキスト描画(縁取り+影) ----------
+    // ---------- テキスト描画(文字単位: 縁取り+影+間隔+切替効果) ----------
+
+    /// <summary>1レイヤー(本体 or 縁取りの1方向)の状態</summary>
+    private sealed class LayerState
+    {
+        public StackPanel Panel = new();
+        public List<Grid> Cells = new();
+        public FontFamily Family = new("Yu Gothic UI");
+        public double Size = 64;
+        public Brush Brush = Brushes.White;
+    }
+
+    private sealed class TextLayers
+    {
+        public Grid Host = new();
+        public List<LayerState> Layers = new();
+        public string LastText = "";
+    }
+
+    private TextLayers _timeLayers = new();
+    private TextLayers _dateLayers = new();
+
     private void RebuildTextVisuals()
     {
         var s = App.Settings;
@@ -68,9 +84,12 @@ public partial class MainWindow : Window
         var textColor = ParseColor(s.TextColor, Colors.White);
         var outlineColor = ParseColor(s.OutlineColor, Colors.Black);
 
-        BuildHost(TimeHost, _timeOutline, ref _timeMain, family, s.FontSize, textColor, outlineColor);
-        var dateSize = Math.Max(12, s.FontSize * 0.35);
-        BuildHost(DateHost, _dateOutline, ref _dateMain, family, dateSize, textColor, outlineColor);
+        // XAML のホストに接続(これが無いと画面に出ない)
+        _timeLayers.Host = TimeHost;
+        _dateLayers.Host = DateHost;
+
+        RebuildLayers(_timeLayers, family, s.FontSize, textColor, outlineColor);
+        RebuildLayers(_dateLayers, family, Math.Max(12, s.FontSize * 0.35), textColor, outlineColor);
     }
 
     private static Color ParseColor(string hex, Color fallback)
@@ -79,14 +98,36 @@ public partial class MainWindow : Window
         catch { return fallback; }
     }
 
-    private static void BuildHost(Grid host, List<TextBlock> outlines, ref TextBlock? main,
-        FontFamily family, double size, Color mainColor, Color outlineColor)
+    private static void RebuildLayers(TextLayers layers, FontFamily family, double size,
+        Color mainColor, Color outlineColor)
     {
-        host.Children.Clear();
-        outlines.Clear();
-
         var s = App.Settings;
+        layers.Host.Children.Clear();
+        layers.Layers.Clear();
+        layers.LastText = "";
+
         var thickness = s.OutlineEnabled ? Math.Clamp(s.OutlineThickness, 0.5, 20) : 0;
+
+        void AddLayer(Brush brush, double dx, double dy, bool isMain)
+        {
+            var st = new LayerState { Family = family, Size = size, Brush = brush };
+            st.Panel.Orientation = Orientation.Horizontal; // 文字を横に並べる
+            st.Panel.RenderTransform = new TranslateTransform(dx, dy);
+            layers.Host.Children.Add(st.Panel);
+            layers.Layers.Add(st);
+            if (isMain)
+            {
+                st.Panel.Effect = s.TextShadow
+                    ? new DropShadowEffect
+                    {
+                        BlurRadius = s.ShadowBlur,
+                        ShadowDepth = Math.Min(8, s.ShadowBlur / 4),
+                        Opacity = s.ShadowOpacity,
+                        Color = Colors.Black,
+                    }
+                    : null;
+            }
+        }
 
         if (thickness > 0)
         {
@@ -94,43 +135,210 @@ public partial class MainWindow : Window
             ob.Freeze();
             double[,] dirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 }, { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } };
             for (var i = 0; i < dirs.GetLength(0); i++)
-            {
-                var tb = new TextBlock { FontFamily = family, FontSize = size, Foreground = ob };
-                tb.RenderTransform = new TranslateTransform(dirs[i, 0] * thickness, dirs[i, 1] * thickness);
-                host.Children.Add(tb);
-                outlines.Add(tb);
-            }
+                AddLayer(ob, dirs[i, 0] * thickness, dirs[i, 1] * thickness, isMain: false);
         }
 
         var mb = new SolidColorBrush(mainColor);
         mb.Freeze();
-        main = new TextBlock { FontFamily = family, FontSize = size, Foreground = mb };
-        host.Children.Add(main);
-
-        ApplyShadowTo(main, s);
+        AddLayer(mb, 0, 0, isMain: true);
     }
 
-    private static void ApplyShadowTo(TextBlock? tb, ClockSettings s)
+    /// <summary>レイヤーの文字セルをテキストに同期(桁数変化で再構築)。</summary>
+    private static void UpdateChars(LayerState st, string text, double letterSp, double sepSp)
     {
-        if (tb is null) return;
-        tb.Effect = s.TextShadow
-            ? new DropShadowEffect
+        if (st.Cells.Count != text.Length)
+        {
+            st.Cells.Clear();
+            st.Panel.Children.Clear();
+            for (var i = 0; i < text.Length; i++)
             {
-                BlurRadius = s.ShadowBlur,
-                ShadowDepth = Math.Min(8, s.ShadowBlur / 4),
-                Opacity = s.ShadowOpacity,
-                Color = Colors.Black,
+                var cell = new Grid();
+                cell.Children.Add(new TextBlock
+                {
+                    FontFamily = st.Family,
+                    FontSize = st.Size,
+                    Foreground = st.Brush,
+                });
+                st.Panel.Children.Add(cell);
+                st.Cells.Add(cell);
             }
-            : null;
+        }
+
+        for (var i = 0; i < text.Length; i++)
+        {
+            var tb = (TextBlock)st.Cells[i].Children[0];
+            tb.Text = text[i].ToString();
+
+            // 間隔: 区切り文字の前後に区切り間隔、全文字の後に文字間隔
+            var isSep = !char.IsLetterOrDigit(text[i]);
+            var left = isSep ? sepSp / 2 : 0;
+            var right = (isSep ? sepSp / 2 : 0) + letterSp;
+            if (i == 0) left = 0;
+            if (i == text.Length - 1) right = 0;
+            tb.Margin = new Thickness(left, 0, right, 0);
+        }
     }
 
-    private void SetText(TextBlock? main, List<TextBlock> outlines, string text, Visibility visibility)
+    private void SetText(TextLayers layers, string text, Visibility visibility)
     {
-        if (main is null) return;
-        main.Text = text;
-        foreach (var o in outlines) o.Text = text;
-        main.Visibility = visibility;
-        foreach (var o in outlines) o.Visibility = visibility;
+        if (text != layers.LastText)
+        {
+            var old = layers.LastText;
+            layers.LastText = text;
+            var s = App.Settings;
+
+            foreach (var st in layers.Layers)
+                UpdateChars(st, text, s.LetterSpacing, s.SeparatorSpacing);
+
+            // 切り替え効果(桁数が変わった時はスムーズにできないのでスキップ)
+            if (s.TransitionEffect != "none" && old.Length == text.Length
+                && layers.Host.Visibility == Visibility.Visible)
+            {
+                for (var i = 0; i < text.Length; i++)
+                    if (old[i] != text[i])
+                        AnimateCharChange(layers, i, old[i]);
+            }
+        }
+        layers.Host.Visibility = visibility;
+    }
+
+    /// <summary>変化した1文字の切替効果アニメーション(全レイヤー同時)。</summary>
+    private static void AnimateCharChange(TextLayers layers, int index, char oldChar)
+    {
+        var s = App.Settings;
+        var dur = TimeSpan.FromMilliseconds(Math.Clamp(s.TransitionDurationMs, 50, 1000));
+        var half = TimeSpan.FromMilliseconds(dur.TotalMilliseconds / 2);
+        var ease = new QuadraticEase { EasingMode = EasingMode.EaseOut };
+
+        foreach (var st in layers.Layers)
+        {
+            if (index >= st.Cells.Count) continue;
+            var cell = st.Cells[index];
+            var tb = (TextBlock)cell.Children[0];
+
+            // 古い残像があれば除去
+            for (var i = cell.Children.Count - 1; i >= 1; i--)
+                cell.Children.RemoveAt(i);
+
+            var ghost = new TextBlock
+            {
+                Text = oldChar.ToString(),
+                FontFamily = st.Family,
+                FontSize = st.Size,
+                Foreground = st.Brush,
+                Margin = tb.Margin,
+            };
+
+            DoubleAnimation? mainAnim = null;
+            DoubleAnimation? ghostAnim = null;
+
+            switch (s.TransitionEffect)
+            {
+                case "flipx":
+                case "flipy":
+                {
+                    var axis = s.TransitionEffect == "flipx"
+                        ? ScaleTransform.ScaleXProperty : ScaleTransform.ScaleYProperty;
+                    var mainT = s.TransitionEffect == "flipx"
+                        ? new ScaleTransform(0, 1, 0.5, 0.5) : new ScaleTransform(1, 0, 0.5, 0.5);
+                    tb.RenderTransform = mainT;
+                    mainAnim = new DoubleAnimation(0, 1, dur)
+                    {
+                        BeginTime = half, EasingFunction = ease, FillBehavior = FillBehavior.HoldEnd,
+                    };
+                    mainT.BeginAnimation(axis, mainAnim);
+
+                    var ghostT = new ScaleTransform(1, 1, 0.5, 0.5);
+                    ghost.RenderTransform = ghostT;
+                    ghostAnim = new DoubleAnimation(1, 0, half)
+                    {
+                        EasingFunction = ease, FillBehavior = FillBehavior.HoldEnd,
+                    };
+                    ghostT.BeginAnimation(axis, ghostAnim);
+                    break;
+                }
+                case "slideup":
+                case "slidedown":
+                {
+                    var dir = s.TransitionEffect == "slideup" ? -1 : 1; // 上へ抜ける=負方向
+                    var offset = st.Size * 1.2;
+
+                    var mainT = new TranslateTransform(-dir * offset, 0);
+                    tb.RenderTransform = mainT;
+                    tb.Opacity = 0;
+                    mainAnim = new DoubleAnimation(-dir * offset, 0, half)
+                    {
+                        BeginTime = half, EasingFunction = ease, FillBehavior = FillBehavior.HoldEnd,
+                    };
+                    mainT.BeginAnimation(TranslateTransform.YProperty, mainAnim);
+                    var mainFade = new DoubleAnimation(0, 1, half)
+                    {
+                        BeginTime = half, FillBehavior = FillBehavior.HoldEnd,
+                    };
+                    tb.BeginAnimation(OpacityProperty, mainFade);
+
+                    var ghostT = new TranslateTransform(0, 0);
+                    ghost.RenderTransform = ghostT;
+                    ghostAnim = new DoubleAnimation(0, dir * offset, half)
+                    {
+                        EasingFunction = ease, FillBehavior = FillBehavior.HoldEnd,
+                    };
+                    ghostT.BeginAnimation(TranslateTransform.YProperty, ghostAnim);
+                    var ghostFade = new DoubleAnimation(1, 0, half)
+                    {
+                        EasingFunction = ease, FillBehavior = FillBehavior.HoldEnd,
+                    };
+                    ghost.BeginAnimation(OpacityProperty, ghostFade);
+                    break;
+                }
+                case "fade":
+                {
+                    // フェードイン・アウト: 古い文字が消えてから新しい文字が出る
+                    tb.Opacity = 0;
+                    mainAnim = new DoubleAnimation(0, 1, half)
+                    {
+                        BeginTime = half, FillBehavior = FillBehavior.HoldEnd,
+                    };
+                    tb.BeginAnimation(OpacityProperty, mainAnim);
+                    ghostAnim = new DoubleAnimation(1, 0, half)
+                    {
+                        EasingFunction = ease, FillBehavior = FillBehavior.HoldEnd,
+                    };
+                    ghost.BeginAnimation(OpacityProperty, ghostAnim);
+                    break;
+                }
+                case "crossfade":
+                {
+                    // クロスフェード: 同時に交差
+                    tb.Opacity = 0;
+                    mainAnim = new DoubleAnimation(0, 1, dur)
+                    {
+                        EasingFunction = ease, FillBehavior = FillBehavior.HoldEnd,
+                    };
+                    tb.BeginAnimation(OpacityProperty, mainAnim);
+                    ghostAnim = new DoubleAnimation(1, 0, dur)
+                    {
+                        EasingFunction = ease, FillBehavior = FillBehavior.HoldEnd,
+                    };
+                    ghost.BeginAnimation(OpacityProperty, ghostAnim);
+                    break;
+                }
+                default:
+                    return;
+            }
+
+            cell.Children.Add(ghost);
+
+            var g = ghostAnim;
+            g.Completed += (_, _) => cell.Children.Remove(ghost);
+            var m = mainAnim;
+            if (m is not null)
+                m.Completed += (_, _) =>
+                {
+                    tb.BeginAnimation(OpacityProperty, null);
+                    tb.Opacity = 1;
+                };
+        }
     }
 
     // ---------- 時刻表示(秒同期: 毎秒1回の起床でCPU負荷最小化) ----------
@@ -164,10 +372,10 @@ public partial class MainWindow : Window
             var now = DateTime.Now;
 
             var s = App.Settings;
-            SetText(_timeMain, _timeOutline, now.ToString(s.TimeFormat), Visibility.Visible);
+            SetText(_timeLayers, now.ToString(s.TimeFormat), Visibility.Visible);
 
             var dateText = string.IsNullOrWhiteSpace(s.DateFormat) || !s.ShowDate ? "" : now.ToString(s.DateFormat);
-            SetText(_dateMain, _dateOutline, dateText,
+            SetText(_dateLayers, dateText,
                 dateText.Length == 0 ? Visibility.Collapsed : Visibility.Visible);
 
             // 位置の自動保存は1分ごと(ディスクにも書くのでクラッシュ耐性あり)
