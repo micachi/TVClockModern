@@ -51,6 +51,9 @@ public partial class MainWindow : Window
         Closed += (_, _) =>
         {
             Logger.Info($"時計ウィンドウClosed: monitor={_monitorDevice}");
+            // タイマーを停止(閉じた窓の監視を続けない)
+            _timer?.Stop();
+            _proximityTimer?.Stop();
             App.Clocks.Remove(this);
         };
     }
@@ -792,6 +795,7 @@ public partial class MainWindow : Window
     // ---------- 設定反映(適用ボタン/設定画面を閉じた後) ----------
     public void ApplySettingsFromDialog()
     {
+        if (!IsLoaded) return; // 閉じた窓には反映しない
         try
         {
             Logger.Info($"設定反映: monitor={_monitorDevice}");
@@ -803,7 +807,17 @@ public partial class MainWindow : Window
             Opacity = App.Settings.WindowOpacity;
 
             StartProximityWatch();
-            ApplyTargetMonitor();
+
+            if (string.IsNullOrEmpty(_monitorDevice))
+            {
+                // 単一モード: プリセット記憶時はそれを優先、なければモニタ指定へ
+                if (!string.IsNullOrWhiteSpace(App.Settings.PositionPreset))
+                    ApplyPreset(App.Settings.PositionPreset);
+                else
+                    ApplyTargetMonitor();
+            }
+            // マルチモニタ同時表示時は担当モニタ内の現在位置を維持
+
             ClampToScreen();
             UpdateClock();
             App.Settings.Save();
@@ -878,8 +892,6 @@ public partial class MainWindow : Window
             // マウスボタン解放後に DragMove が呼ばれた場合の benign 例外
         }
     }
-
-    private static bool _settingsOpen;
 
     private void OnContextMenuRequest(object sender, MouseButtonEventArgs e)
         => ClockMenu.IsOpen = true;

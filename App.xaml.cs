@@ -268,6 +268,7 @@ public partial class App : Application
         try
         {
             if (reason is not null) Logger.Info(reason);
+            try { Settings.Save(); } catch { } // Environment.Exit は OnExit を通らないため明示保存
             var exe = Environment.ProcessPath;
             if (string.IsNullOrEmpty(exe)) return;
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
