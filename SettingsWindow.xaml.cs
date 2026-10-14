@@ -1,4 +1,6 @@
 using System.IO;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -20,33 +22,10 @@ public partial class SettingsWindow : Window
     };
 
     private bool _ready;
-    private System.Windows.Threading.DispatcherTimer? _liveApplyTimer;
-
-    /// <summary>スライダー/コンボ操作を250msデバウンスで時計へライブ反映。</summary>
-    private void ScheduleLiveApply()
-    {
-        if (_liveApplyTimer is null)
-        {
-            _liveApplyTimer = new System.Windows.Threading.DispatcherTimer
-            {
-                Interval = TimeSpan.FromMilliseconds(250),
-            };
-            _liveApplyTimer.Tick += (_, _) =>
-            {
-                _liveApplyTimer.Stop();
-                if (!_ready) return;
-                SaveToSettings();
-                ApplyToClock();
-            };
-        }
-        _liveApplyTimer.Stop();
-        _liveApplyTimer.Start();
-    }
 
     public SettingsWindow()
     {
         InitializeComponent();
-        Closed += (_, _) => _liveApplyTimer?.Stop();
         Loaded += (_, _) => { LoadFromSettings(); _ready = true; UpdatePreview(); };
     }
 
@@ -337,6 +316,62 @@ public partial class SettingsWindow : Window
         }
     }
 
+    // ---------- エクスポート / インポート ----------
+    private static readonly JsonSerializerOptions JsonOpts = new()
+    {
+        WriteIndented = true,
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+    };
+
+    private void OnExport(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var dlg = new Microsoft.Win32.SaveFileDialog
+            {
+                FileName = "TVClockModern設定.json",
+                Filter = "JSON ファイル|*.json|すべてのファイル|*.*",
+                DefaultExt = ".json",
+            };
+            if (dlg.ShowDialog() != true) return;
+            File.WriteAllText(dlg.FileName, JsonSerializer.Serialize(App.Settings, JsonOpts));
+            Logger.Info($"設定をエクスポート: {dlg.FileName}");
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("設定エクスポートに失敗", ex);
+            MessageBox.Show(this, $"エクスポートに失敗しました:\n{ex.Message}", "TVClock Modern");
+        }
+    }
+
+    private void OnImport(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var dlg = new Microsoft.Win32.OpenFileDialog
+            {
+                Filter = "JSON ファイル|*.json|すべてのファイル|*.*",
+            };
+            if (dlg.ShowDialog() != true) return;
+
+            var imported = JsonSerializer.Deserialize<ClockSettings>(File.ReadAllText(dlg.FileName), JsonOpts);
+            if (imported is null) throw new InvalidDataException("設定ファイルの内容が空です。");
+            imported.Sanitize();
+
+            App.Settings = imported;
+            App.Settings.Save();
+            ApplyAutoStart(App.Settings.AutoStart);
+            ApplyToClock();
+            LoadFromSettings(); // ダイアログUIも新しい設定に同期
+            Logger.Info($"設定をインポート: {dlg.FileName}");
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("設定インポートに失敗", ex);
+            MessageBox.Show(this, $"インポートに失敗しました:\n{ex.Message}", "TVClock Modern");
+        }
+    }
+
     private void OnApply(object sender, RoutedEventArgs e)
     {
         SaveToSettings();
@@ -381,20 +416,11 @@ public partial class SettingsWindow : Window
     }
 
     private void OnPreviewChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-    {
-        UpdatePreview();
-        ScheduleLiveApply();
-    }
+        => UpdatePreview();
 
     private void OnPreviewChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-    {
-        UpdatePreview();
-        ScheduleLiveApply();
-    }
+        => UpdatePreview();
 
     private void OnPreviewChanged(object sender, RoutedEventArgs e)
-    {
-        UpdatePreview();
-        ScheduleLiveApply();
-    }
+        => UpdatePreview();
 }

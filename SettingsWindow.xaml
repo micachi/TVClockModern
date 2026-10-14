@@ -226,6 +226,11 @@
         </TabControl>
 
         <StackPanel Grid.Row="1" Margin="0,8,0,0">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="設定の移動: " VerticalAlignment="Center"/>
+                <Button Width="90" Content="エクスポート" Margin="0,0,8,0" Click="OnExport"/>
+                <Button Width="90" Content="インポート" Click="OnImport"/>
+            </StackPanel>
             <TextBlock Text="プレビュー" FontWeight="Bold"/>
             <Border Background="#FF111111" Padding="8" Margin="0,4,0,12" CornerRadius="4" MinHeight="80">
             <Grid HorizontalAlignment="Center" VerticalAlignment="Center">

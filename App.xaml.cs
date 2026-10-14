@@ -16,7 +16,7 @@ public partial class App : Application
     private System.Windows.Forms.NotifyIcon? _tray;
     private int _dispatchedExceptions;
 
-    public static ClockSettings Settings { get; private set; } = new();
+    public static ClockSettings Settings { get; set; } = new();
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -46,7 +46,7 @@ public partial class App : Application
 
         // --- 単一インスタンス(再起動競合に備えて最大5秒待機) ---
         var isNew = false;
-        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(2);
         while (true)
         {
             _singleInstanceMutex = new Mutex(initiallyOwned: true, @"Local\TVClockModern.SingleInstance", out isNew);
@@ -55,6 +55,8 @@ public partial class App : Application
             if (DateTime.UtcNow > deadline)
             {
                 Logger.Info("既存インスタンスがあるため終了");
+                System.Windows.MessageBox.Show("TVClock Modern は既に起動しています。",
+                    "TVClock Modern", MessageBoxButton.OK, MessageBoxImage.Information);
                 Shutdown();
                 return;
             }

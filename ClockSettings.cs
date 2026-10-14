@@ -25,11 +25,11 @@ public sealed class ClockSettings
     public bool TextShadow { get; set; } = true;
     public double ShadowBlur { get; set; } = 6;      // 影の大きさ(ぼかし半径)
     public double ShadowOpacity { get; set; } = 0.85; // 影の濃さ
-    public bool OutlineEnabled { get; set; } = false; // 文字縁取り
+    public bool OutlineEnabled { get; set; } = true; // 文字縁取り(既定オン・2px)
     public string OutlineColor { get; set; } = "#FF000000";
     public double OutlineThickness { get; set; } = 2;
     public double WindowOpacity { get; set; } = 1.0;
-    public bool ShowDate { get; set; } = true;
+    public bool ShowDate { get; set; } = false;
 
     // --- マウス接近時のフェード ---
     public bool ProximityEnabled { get; set; } = false;
@@ -121,7 +121,8 @@ public sealed class ClockSettings
     }
 
     /// <summary>異常値の丸め。壊れた設定値で UI/座標計算が爆発しないようにする。</summary>
-    private void Sanitize()
+    /// <summary>異常値の丸め。壊れた設定値で UI/座標計算が爆発しないようにする。インポートした設定にも使用。</summary>
+    public void Sanitize()
     {
         TimeFormat = string.IsNullOrWhiteSpace(TimeFormat) ? "HH:mm" : TimeFormat;
         DateFormat ??= "";
