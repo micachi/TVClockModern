@@ -1,0 +1,22 @@
+<Window x:Class="TVClockModern.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="TVClock Modern"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ShowInTaskbar="False"
+        ShowActivated="False"
+        ResizeMode="NoResize"
+        Topmost="True"
+        SizeToContent="WidthAndHeight">
+    <Grid>
+        <StackPanel x:Name="ClockPanel"
+                    Margin="12,8,12,8"
+                    MouseLeftButtonDown="OnDragMove"
+                    MouseRightButtonUp="OnContextMenuRequest">
+            <Grid x:Name="TimeHost" HorizontalAlignment="Center"/>
+            <Grid x:Name="DateHost" HorizontalAlignment="Center" Margin="0,0,0,2"/>
+        </StackPanel>
+    </Grid>
+</Window>
