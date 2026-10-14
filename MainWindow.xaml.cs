@@ -152,7 +152,7 @@ public partial class MainWindow : Window
             st.Panel.Children.Clear();
             for (var i = 0; i < text.Length; i++)
             {
-                var cell = new Grid();
+                var cell = new Grid { ClipToBounds = true }; // スロット風にクリップ
                 cell.Children.Add(new TextBlock
                 {
                     FontFamily = st.Family,
@@ -237,10 +237,12 @@ public partial class MainWindow : Window
                 case "flipx":
                 case "flipy":
                 {
+                    // 文字の中心を軸に反転(横回転=縦方向の中心、縦回転=横方向の中心)
+                    tb.RenderTransformOrigin = new Point(0.5, 0.5);
+                    ghost.RenderTransformOrigin = new Point(0.5, 0.5);
                     var axis = s.TransitionEffect == "flipx"
                         ? ScaleTransform.ScaleXProperty : ScaleTransform.ScaleYProperty;
-                    var mainT = s.TransitionEffect == "flipx"
-                        ? new ScaleTransform(0, 1, 0.5, 0.5) : new ScaleTransform(1, 0, 0.5, 0.5);
+                    var mainT = new ScaleTransform();
                     tb.RenderTransform = mainT;
                     mainAnim = new DoubleAnimation(0, 1, dur)
                     {
@@ -248,7 +250,7 @@ public partial class MainWindow : Window
                     };
                     mainT.BeginAnimation(axis, mainAnim);
 
-                    var ghostT = new ScaleTransform(1, 1, 0.5, 0.5);
+                    var ghostT = new ScaleTransform();
                     ghost.RenderTransform = ghostT;
                     ghostAnim = new DoubleAnimation(1, 0, half)
                     {
@@ -260,35 +262,25 @@ public partial class MainWindow : Window
                 case "slideup":
                 case "slidedown":
                 {
+                    // スロット式: 旧数字が抜けると同時に新数字が流れ込む(同時進行)
                     var dir = s.TransitionEffect == "slideup" ? -1 : 1; // 上へ抜ける=負方向
-                    var offset = st.Size * 1.2;
+                    var lineH = st.Size * 1.25;
 
-                    var mainT = new TranslateTransform(-dir * offset, 0);
+                    var mainT = new TranslateTransform(0, -dir * lineH);
                     tb.RenderTransform = mainT;
-                    tb.Opacity = 0;
-                    mainAnim = new DoubleAnimation(-dir * offset, 0, half)
+                    mainAnim = new DoubleAnimation(-dir * lineH, 0, dur)
                     {
-                        BeginTime = half, EasingFunction = ease, FillBehavior = FillBehavior.HoldEnd,
+                        EasingFunction = ease, FillBehavior = FillBehavior.HoldEnd,
                     };
                     mainT.BeginAnimation(TranslateTransform.YProperty, mainAnim);
-                    var mainFade = new DoubleAnimation(0, 1, half)
-                    {
-                        BeginTime = half, FillBehavior = FillBehavior.HoldEnd,
-                    };
-                    tb.BeginAnimation(OpacityProperty, mainFade);
 
                     var ghostT = new TranslateTransform(0, 0);
                     ghost.RenderTransform = ghostT;
-                    ghostAnim = new DoubleAnimation(0, dir * offset, half)
+                    ghostAnim = new DoubleAnimation(0, dir * lineH, dur)
                     {
                         EasingFunction = ease, FillBehavior = FillBehavior.HoldEnd,
                     };
                     ghostT.BeginAnimation(TranslateTransform.YProperty, ghostAnim);
-                    var ghostFade = new DoubleAnimation(1, 0, half)
-                    {
-                        EasingFunction = ease, FillBehavior = FillBehavior.HoldEnd,
-                    };
-                    ghost.BeginAnimation(OpacityProperty, ghostFade);
                     break;
                 }
                 case "fade":
@@ -337,6 +329,7 @@ public partial class MainWindow : Window
                 {
                     tb.BeginAnimation(OpacityProperty, null);
                     tb.Opacity = 1;
+                    tb.RenderTransform = null; // 残存オフセットによる位置ズレを防ぐ
                 };
         }
     }
