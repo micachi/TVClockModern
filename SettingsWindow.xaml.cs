@@ -20,10 +20,33 @@ public partial class SettingsWindow : Window
     };
 
     private bool _ready;
+    private System.Windows.Threading.DispatcherTimer? _liveApplyTimer;
+
+    /// <summary>スライダー/コンボ操作を250msデバウンスで時計へライブ反映。</summary>
+    private void ScheduleLiveApply()
+    {
+        if (_liveApplyTimer is null)
+        {
+            _liveApplyTimer = new System.Windows.Threading.DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(250),
+            };
+            _liveApplyTimer.Tick += (_, _) =>
+            {
+                _liveApplyTimer.Stop();
+                if (!_ready) return;
+                SaveToSettings();
+                ApplyToClock();
+            };
+        }
+        _liveApplyTimer.Stop();
+        _liveApplyTimer.Start();
+    }
 
     public SettingsWindow()
     {
         InitializeComponent();
+        Closed += (_, _) => _liveApplyTimer?.Stop();
         Loaded += (_, _) => { LoadFromSettings(); _ready = true; UpdatePreview(); };
     }
 
@@ -358,11 +381,20 @@ public partial class SettingsWindow : Window
     }
 
     private void OnPreviewChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-        => UpdatePreview();
+    {
+        UpdatePreview();
+        ScheduleLiveApply();
+    }
 
     private void OnPreviewChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        => UpdatePreview();
+    {
+        UpdatePreview();
+        ScheduleLiveApply();
+    }
 
     private void OnPreviewChanged(object sender, RoutedEventArgs e)
-        => UpdatePreview();
+    {
+        UpdatePreview();
+        ScheduleLiveApply();
+    }
 }
