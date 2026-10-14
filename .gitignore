@@ -7,3 +7,4 @@ publish-sc/
 *.suo
 .vs/
 *.log
+release-sc/
