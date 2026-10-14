@@ -1,6 +1,9 @@
 # TVClock Modern
 
-Windows デスクトップ常駐のデジタル時計。**TVClock のクリーンルーム再実装**(元コード非参照)です。
+> **注意: 本プロジェクトは TVClock 及びその作者とは一切関係ありません。**
+> 独立したオープンソースプロジェクトであり、オリジナルのコード・リソース・商標を使用していません。
+
+Windows デスクトップ常駐のデジタル時計。**クリーンルーム方式で新規実装**した汎用デスクトップ時計です。
 .NET 8 / WPF 製。単一 exe・常駐・省負荷・クラッシュしにくい設計。
 
 ![.NET 8.0](https://img.shields.io/badge/.NET-8.0--windows-blue) ![platform](https://img.shields.io/badge/platform-Windows%2010%2F11-lightgrey)
@@ -56,6 +59,10 @@ dotnet publish -c Release -o publish-sc -p:SelfContained=true
 
 [MIT](LICENSE)
 
-## 謝辞
+## 名称について
 
-オリジナルの **TVClock** にインスピレーションを得ました。本作はクリーンルーム方式で新規実装されており、オリジナルのコード・リソースは一切含みません。
+「TVClock Modern」という名称は、既存のデスクトップ時計アプリに着想を得た**独立プロジェクト**であることを示すためのものです。以下に該当しません:
+
+- 既存の TVClock(またはその他の時計ソフト)のフォーク・改変・逆アセンブル
+- 既存ソフトの作者・権利者との提携・承認・後援
+- 既存ソフトのリソース(画像・アイコン・コード)の利用
