@@ -243,6 +243,8 @@ public partial class MainWindow : Window
                     var axis = s.TransitionEffect == "flipx"
                         ? ScaleTransform.ScaleXProperty : ScaleTransform.ScaleYProperty;
                     var mainT = new ScaleTransform();
+                    // BeginTime 遅延中はベース値が見えるため、先に 0 (潰れた状態) へ
+                    if (s.TransitionEffect == "flipx") mainT.ScaleX = 0; else mainT.ScaleY = 0;
                     tb.RenderTransform = mainT;
                     mainAnim = new DoubleAnimation(0, 1, dur)
                     {
