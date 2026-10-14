@@ -11,6 +11,7 @@
     <AssemblyName>TVClockModern</AssemblyName>
     <Version>1.0.0</Version>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>assets\app.ico</ApplicationIcon>
     <InvariantGlobalization>false</InvariantGlobalization>
     <!-- 単一exe配布用 -->
     <PublishSingleFile Condition="'$(RuntimeIdentifier)' != ''">true</PublishSingleFile>

@@ -201,6 +201,23 @@ public partial class App : Application
         base.OnExit(e);
     }
 
+    /// <summary>アプリアイコンの読み込み(埋め込みリソース → 実行ファイル → 既定)。</summary>
+    private static System.Drawing.Icon LoadAppIcon()
+    {
+        try
+        {
+            // exe 自身に埋め込まれたアイコン(ApplicationIcon 設定により存在する)
+            var exe = Environment.ProcessPath;
+            if (!string.IsNullOrEmpty(exe))
+                return System.Drawing.Icon.ExtractAssociatedIcon(exe) ?? System.Drawing.SystemIcons.Application;
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("アイコン読み込みに失敗", ex);
+        }
+        return System.Drawing.SystemIcons.Application;
+    }
+
     // ---------- タスクトレイ(クリックスルー時の生命線) ----------
     private void InitTray()
     {
@@ -247,7 +264,7 @@ public partial class App : Application
 
         _tray = new System.Windows.Forms.NotifyIcon
         {
-            Icon = System.Drawing.SystemIcons.Application,
+            Icon = LoadAppIcon(),
             Text = "TVClock Modern",
             ContextMenuStrip = menu,
             Visible = true,

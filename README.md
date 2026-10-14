@@ -1,5 +1,9 @@
 # TVClock Modern
 
+<p align="center">
+  <img src="assets/icon-512.png" width="128" alt="TVClock Modern">
+</p>
+
 > **注意: 本プロジェクトは TVClock 及びその作者とは一切関係ありません。**
 > 独立したオープンソースプロジェクトであり、オリジナルのコード・リソース・商標を使用していません。
 
