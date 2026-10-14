@@ -6,3 +6,4 @@ publish-sc/
 *.user
 *.suo
 .vs/
+*.log
