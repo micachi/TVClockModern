@@ -369,7 +369,12 @@ public partial class MainWindow : Window
     /// <summary>書式例外でもタイマーを止めず、最後の正常表示を維持する。</summary>
     private static string SafeTimeText(DateTime now, string format, string? fallback)
     {
-        try { return now.ToString(format); }
+        try
+        {
+            var r = now.ToString(format);
+            _formatErrorLogged = false; // 書式が治ったら再度ログできるように
+            return r;
+        }
         catch (Exception ex)
         {
             if (!_formatErrorLogged)
