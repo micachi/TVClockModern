@@ -285,6 +285,13 @@
                                        Foreground="#FF999999" VerticalAlignment="Center" Margin="0,4,0,4"/>
                         </Grid>
 
+                        <TextBlock Text="設定の移動" FontWeight="Bold" Margin="0,16,0,4"/>
+                        <StackPanel Orientation="Horizontal">
+                            <Button Width="120" Content="エクスポート..." Margin="0,0,8,0" Click="OnExport"/>
+                            <Button Width="120" Content="インポート..." Click="OnImport"/>
+                        </StackPanel>
+                        <TextBlock Text="設定は %APPDATA%\TVClockModern\settings.json に保存されます。" Foreground="#FF999999" Margin="0,2,0,0"/>
+
                         <TextBlock Text="免責事項" FontWeight="Bold" Margin="0,16,0,4"/>
                         <TextBlock TextWrapping="Wrap" Foreground="#FF999999"
                                    Text="本ソフトウェアは現状有姿 (AS IS) で提供されます。明示的か暗黙的かを問わず、いかなる保証も行いません。本ソフトウェアの使用または使用不能により生じたいかなる損害についても、作者は一切の責任を負いません。"/>
