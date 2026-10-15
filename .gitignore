@@ -13,3 +13,4 @@ publish-sc/
 *.log
 release-sc/
 gifframes.ps1
+release-notes-v1.1.0.md
