@@ -11,6 +11,9 @@ public partial class App : Application
     /// <summary>稼働中の時計ウィンドウ(マルチモニタ同時表示時は複数)</summary>
     public static List<MainWindow> Clocks { get; } = new();
 
+    /// <summary>設定をファイルからロード済みか(#1: 未ロード状態での保存を防ぐ)</summary>
+    private static bool _settingsLoaded;
+
     /// <summary>設定画面が開いているか(時計クリック時の前面再登場判定用)</summary>
     public static bool SettingsWindowOpen;
     private System.Windows.Forms.NotifyIcon? _tray;
@@ -66,6 +69,7 @@ public partial class App : Application
 
         // --- 設定ロード(失敗時もフォールバック済み) ---
         Settings = ClockSettings.Load();
+        _settingsLoaded = true;
 
         base.OnStartup(e);
 
@@ -131,12 +135,24 @@ public partial class App : Application
             Logger.Info($"EnsureClocks開始: 全モニタ={Settings.ShowOnAllMonitors} 現在{Clocks.Count}窗");
             if (!Settings.ShowOnAllMonitors)
             {
-                // 単一モード: 1つだけ残す
-                for (var i = Clocks.Count - 1; i >= 1; i--)
+                // 単一モード(#2): MonitorDevice が空の新しい単一時計を生成し、
+                // 既存の全時計(担当モニタ付き含む)は表示後に閉じる。
+                // Clocks からの除去を先に行い、Close() 中の Closed ハンドラとの
+                // 競合(二重削除・誤削除)を防ぐ。
+                if (Clocks.All(c => c.MonitorDevice != ""))
                 {
-                    Logger.Info("単一モード: 余分な時計を閉じる");
-                    Clocks[i].Close();
-                    Clocks.RemoveAt(i);
+                    Logger.Info("単一モード: 新しい単一時計を生成");
+                    var newWin = new MainWindow();
+                    newWin.Show();
+                    Clocks.Add(newWin);
+                    Application.Current.MainWindow = newWin;
+                }
+                var obsoleteSingle = Clocks.Where(c => c.MonitorDevice != "").ToList();
+                foreach (var w in obsoleteSingle)
+                {
+                    Logger.Info("単一モード: 担当モニタ付き時計を閉じる");
+                    Clocks.Remove(w);
+                    w.Close();
                 }
                 return;
             }
@@ -153,19 +169,15 @@ public partial class App : Application
                 Clocks.Add(win);
             }
             // 存在しないモニタの分を削除
-            for (var i = Clocks.Count - 1; i >= 0; i--)
+            // 存在しないモニタ・単一モード時計の分を削除
+            // (Clocks からの除去を先に行い、Closed ハンドラとの競合を防ぐ)
+            var obsolete = Clocks.Where(c => c.MonitorDevice == "" ||
+                screens.All(s => s.DeviceName != c.MonitorDevice)).ToList();
+            foreach (var w in obsolete)
             {
-                if (Clocks[i].MonitorDevice == "")
-                {
-                    Logger.Info("単一モード時計を閉じる(全モニタモードへ切替)");
-                    Clocks[i].Close(); Clocks.RemoveAt(i); continue;
-                }
-                if (screens.All(s => s.DeviceName != Clocks[i].MonitorDevice))
-                {
-                    Logger.Info("切断モニタの時計を閉じる: " + Clocks[i].MonitorDevice);
-                    Clocks[i].Close();
-                    Clocks.RemoveAt(i);
-                }
+                Logger.Info("不要な時計を閉じる: " + w.MonitorDevice);
+                Clocks.Remove(w);
+                w.Close();
             }
             if (Clocks.Count > 0) Application.Current.MainWindow = Clocks[0];
         }
@@ -194,7 +206,12 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
-        try { Settings.Save(); } catch { /* 保存失敗は無視 */ }
+        // #1: 設定をロード済みで自分が Mutex を所有している場合だけ保存する。
+        // 二重起動で拒否されたプロセス(未ロード・非所有)が既定値で上書きしないようにする。
+        if (_ownsMutex && _settingsLoaded)
+        {
+            try { Settings.Save(); } catch { /* 保存失敗は無視 */ }
+        }
         try { _tray?.Dispose(); } catch { }
         try { if (_ownsMutex) _singleInstanceMutex?.ReleaseMutex(); } catch { }
         try { _singleInstanceMutex?.Dispose(); } catch { }
@@ -234,7 +251,8 @@ public partial class App : Application
         miTopmost.Checked = Settings.Topmost;
         miTopmost.Click += (_, _) =>
         {
-            Settings.Topmost = miTopmost.Checked;
+            // 開いた時点で同期済みの最新状態を反転(#7)
+            Settings.Topmost = !Settings.Topmost;
             Dispatcher.Invoke(ApplyToAllClocks);
             Settings.Save();
         };
@@ -244,9 +262,16 @@ public partial class App : Application
         miClickThrough.Checked = Settings.ClickThrough;
         miClickThrough.Click += (_, _) =>
         {
-            Settings.ClickThrough = miClickThrough.Checked;
+            Settings.ClickThrough = !Settings.ClickThrough;
             Dispatcher.Invoke(ApplyToAllClocks);
             Settings.Save();
+        };
+
+        // 開くたびに最新の設定へ同期(#7)
+        menu.Opening += (_, _) =>
+        {
+            miTopmost.Checked = Settings.Topmost;
+            miClickThrough.Checked = Settings.ClickThrough;
         };
 
         var miRestart = new System.Windows.Forms.ToolStripMenuItem("再起動(&R)");
@@ -285,7 +310,10 @@ public partial class App : Application
         try
         {
             if (reason is not null) Logger.Info(reason);
-            try { Settings.Save(); } catch { } // Environment.Exit は OnExit を通らないため明示保存
+            if (_ownsMutex && _settingsLoaded)
+            {
+                try { Settings.Save(); } catch { } // Environment.Exit は OnExit を通らないため明示保存
+            }
             var exe = Environment.ProcessPath;
             if (string.IsNullOrEmpty(exe)) return;
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo

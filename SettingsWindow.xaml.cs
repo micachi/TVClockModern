@@ -23,10 +23,54 @@ public partial class SettingsWindow : Window
 
     private bool _ready;
 
+    /// <summary>ウィンドウ サイズを表示先モニターの作業領域に収める(#10)。</summary>
+    private void ClampToWorkArea()
+    {
+        try
+        {
+            var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+            if (hwnd == IntPtr.Zero) return;
+            var screen = System.Windows.Forms.Screen.FromHandle(hwnd);
+            var dpi = VisualTreeHelper.GetDpi(this).PixelsPerDip;
+
+            // 物理px → DIP へ変換して上限にする
+            var maxW = screen.WorkingArea.Width / dpi;
+            var maxH = screen.WorkingArea.Height / dpi;
+
+            MaxWidth = Math.Max(MinWidth, maxW - 16);
+            MaxHeight = Math.Max(MinHeight, maxH - 16);
+            if (ActualHeight > MaxHeight) Height = MaxHeight;
+            if (ActualWidth > MaxWidth) Width = MaxWidth;
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("作業領域へのクランプに失敗", ex);
+        }
+    }
+
+    /// <summary>編集可能な書式コンボの TextBox に TextChanged を接続する(#9)。</summary>
+    private void HookEditableFormatBoxes()
+    {
+        foreach (var combo in new[] { TimeFormatBox, DateFormatBox })
+        {
+            if (combo.Template?.FindName("PART_EditableTextBox", combo) is TextBox tb)
+                tb.TextChanged += (_, _) => UpdatePreview();
+        }
+    }
+
     public SettingsWindow()
     {
         InitializeComponent();
-        Loaded += (_, _) => { LoadFromSettings(); _ready = true; UpdatePreview(); };
+        SourceInitialized += (_, _) => ClampToWorkArea();
+        Loaded += (_, _) =>
+        {
+            ClampToWorkArea();
+            HookEditableFormatBoxes();
+            LoadFromSettings();
+            _ready = true;
+            UpdatePreview();
+        };
+        LocationChanged += (_, _) => ClampToWorkArea();
     }
 
     private sealed record MonitorItem(string Name, string Device)
@@ -224,10 +268,18 @@ public partial class SettingsWindow : Window
         catch { return fallback; }
     }
 
-    private void BuildPreviewText(Grid host, string text, FontFamily family, double size,
+    private void BuildPreviewText(StackPanel host, string text, FontFamily family, double size,
         Color mainColor, Color outlineColor, double outlineThickness, bool shadow)
     {
         host.Children.Clear();
+        var letterSp = LetterSpacingSlider?.Value ?? 0;
+        var sepSp = SeparatorSpacingSlider?.Value ?? 0;
+
+        // 実時計と同じ文字単位の余白計算を使用(#9)
+        var mainPanel = new StackPanel { Orientation = Orientation.Horizontal };
+        BuildChars(mainPanel, text, family, size, new SolidColorBrush(mainColor), letterSp, sepSp, shadow);
+        host.Children.Add(mainPanel);
+
         if (outlineThickness > 0)
         {
             var ob = new SolidColorBrush(outlineColor);
@@ -235,25 +287,40 @@ public partial class SettingsWindow : Window
             double[,] dirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 }, { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } };
             for (var i = 0; i < dirs.GetLength(0); i++)
             {
-                var tb = new TextBlock { Text = text, FontFamily = family, FontSize = size, Foreground = ob };
-                tb.RenderTransform = new TranslateTransform(dirs[i, 0] * outlineThickness, dirs[i, 1] * outlineThickness);
-                host.Children.Add(tb);
+                var panel = new StackPanel { Orientation = Orientation.Horizontal };
+                panel.RenderTransform = new TranslateTransform(dirs[i, 0] * outlineThickness, dirs[i, 1] * outlineThickness);
+                BuildChars(panel, text, family, size, ob, letterSp, sepSp, shadow: false);
+                host.Children.Add(panel);
             }
         }
-        var mb = new SolidColorBrush(mainColor);
-        mb.Freeze();
-        var main = new TextBlock { Text = text, FontFamily = family, FontSize = size, Foreground = mb };
-        if (shadow)
-        {
-            main.Effect = new DropShadowEffect
+    }
+
+    private void BuildChars(StackPanel panel, string text, FontFamily family, double size,
+        Brush brush, double letterSp, double sepSp, bool shadow)
+    {
+        var eff = shadow
+            ? new DropShadowEffect
             {
                 BlurRadius = ShadowBlurSlider?.Value ?? 6,
                 ShadowDepth = Math.Min(8, (ShadowBlurSlider?.Value ?? 6) / 4),
                 Opacity = ShadowOpacitySlider?.Value ?? 0.85,
                 Color = Colors.Black,
+            }
+            : null;
+
+        for (var i = 0; i < text.Length; i++)
+        {
+            var tb = new TextBlock
+            {
+                Text = text[i].ToString(),
+                FontFamily = family,
+                FontSize = size,
+                Foreground = brush,
+                Margin = CharSpacing.GetCharMargin(text[i], i, text.Length, letterSp, sepSp),
+                Effect = eff,
             };
+            panel.Children.Add(tb);
         }
-        host.Children.Add(main);
     }
 
     private static string SafeFormat(DateTime dt, string format, string fallback)
@@ -266,8 +333,25 @@ public partial class SettingsWindow : Window
     private void SaveToSettings()
     {
         var s = App.Settings;
-        s.TimeFormat = string.IsNullOrWhiteSpace(TimeFormatBox.Text) ? "HH:mm" : TimeFormatBox.Text;
-        s.DateFormat = DateFormatBox.Text ?? "";
+        var invalid = new List<string>();
+
+        // 書式検証(#3): 不正な書式は既存設定を保持し、その旨を通知する
+        var tf = string.IsNullOrWhiteSpace(TimeFormatBox.Text) ? "HH:mm" : TimeFormatBox.Text;
+        if (ClockSettings.IsValidFormat(tf)) s.TimeFormat = tf;
+        else invalid.Add($"時刻フォーマット ({TimeFormatBox.Text})");
+
+        var df = DateFormatBox.Text ?? "";
+        if (df.Length == 0 || ClockSettings.IsValidFormat(df)) s.DateFormat = df;
+        else invalid.Add($"日付フォーマット ({df})");
+
+        if (invalid.Count > 0)
+        {
+            var detail = string.Join("\n", invalid);
+            MessageBox.Show(this,
+                "次の書式が無効のため、以前の値を保持しました:\n" + detail,
+                "TVClock Modern", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+
         s.FontFamily = string.IsNullOrWhiteSpace(FontBox.Text) ? "Yu Gothic UI" : FontBox.Text;
         s.FontSize = SizeSlider.Value;
         s.LetterSpacing = LetterSpacingSlider.Value;
@@ -309,11 +393,10 @@ public partial class SettingsWindow : Window
 
     private void OnPreset(object sender, RoutedEventArgs e)
     {
+        // #11: 位置プリセットは「位置のみ」を即時反映する。
+        // 他の未適用の編集(色・自動起動・全モニタ表示など)は SaveToSettings しない。
         if (sender is Button b && b.Tag is string preset)
-        {
-            SaveToSettings();
             App.ApplyPositionPreset(preset);
-        }
     }
 
     // ---------- エクスポート / インポート ----------

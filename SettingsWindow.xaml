@@ -4,8 +4,10 @@
         Title="TVClock Modern - 設定"
         Width="480"
         Height="840"
+        MinWidth="480"
+        MinHeight="420"
         WindowStartupLocation="CenterScreen"
-        ResizeMode="NoResize"
+        ResizeMode="CanResize"
         Background="{StaticResource DialogBackground}"
         Foreground="#FFDDDDDD"
         ShowInTaskbar="True">
@@ -235,8 +237,8 @@
             <Border Background="#FF111111" Padding="8" Margin="0,4,0,12" CornerRadius="4" MinHeight="80">
             <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                 <StackPanel>
-                    <Grid x:Name="PreviewTimeHost" HorizontalAlignment="Center"/>
-                    <Grid x:Name="PreviewDateHost" HorizontalAlignment="Center"/>
+                    <StackPanel x:Name="PreviewTimeHost" Orientation="Horizontal" HorizontalAlignment="Center"/>
+                    <StackPanel x:Name="PreviewDateHost" Orientation="Horizontal" HorizontalAlignment="Center"/>
                 </StackPanel>
             </Grid>
         </Border>

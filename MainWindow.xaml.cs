@@ -363,6 +363,23 @@ public partial class MainWindow : Window
         _timer.Interval = TimeSpan.FromMilliseconds(ms);
     }
 
+    private static bool _formatErrorLogged;
+
+    /// <summary>書式例外でもタイマーを止めず、最後の正常表示を維持する。</summary>
+    private static string SafeTimeText(DateTime now, string format, string? fallback)
+    {
+        try { return now.ToString(format); }
+        catch (Exception ex)
+        {
+            if (!_formatErrorLogged)
+            {
+                _formatErrorLogged = true;
+                Logger.Error($"時刻書式が不正のため前回表示を維持: {format}", ex);
+            }
+            return fallback ?? now.ToString("HH:mm");
+        }
+    }
+
     private void UpdateClock()
     {
         try
@@ -370,9 +387,11 @@ public partial class MainWindow : Window
             var now = DateTime.Now;
 
             var s = App.Settings;
-            SetText(_timeLayers, now.ToString(s.TimeFormat), Visibility.Visible);
+            SetText(_timeLayers, SafeTimeText(now, s.TimeFormat, _timeLayers.LastText), Visibility.Visible);
 
-            var dateText = string.IsNullOrWhiteSpace(s.DateFormat) || !s.ShowDate ? "" : now.ToString(s.DateFormat);
+            var dateText = string.IsNullOrWhiteSpace(s.DateFormat) || !s.ShowDate
+                ? ""
+                : SafeTimeText(now, s.DateFormat, _dateLayers.LastText);
             SetText(_dateLayers, dateText,
                 dateText.Length == 0 ? Visibility.Collapsed : Visibility.Visible);
 
@@ -385,8 +404,8 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
+            // 描画例外でタイマーを停止しない(次の秒で自動復帰する)
             Logger.Error("時計描画中の例外", ex);
-            try { _timer?.Stop(); } catch { }
         }
     }
 
@@ -810,11 +829,11 @@ public partial class MainWindow : Window
 
             if (string.IsNullOrEmpty(_monitorDevice))
             {
-                // 単一モード: プリセット記憶時はそれを優先、なければモニタ指定へ
+                // 単一モード: 対象モニターへ移動してから、そのモニター内でプリセット整列
+                // (#6: プリセットありでも対象モニター変更が無視されない順序)
+                ApplyTargetMonitor();
                 if (!string.IsNullOrWhiteSpace(App.Settings.PositionPreset))
                     ApplyPreset(App.Settings.PositionPreset);
-                else
-                    ApplyTargetMonitor();
             }
             // マルチモニタ同時表示時は担当モニタ内の現在位置を維持
 
@@ -834,27 +853,35 @@ public partial class MainWindow : Window
         var miSettings = new MenuItem { Header = "設定(_S)" };
         miSettings.Click += (_, _) => ShowSettings();
 
-        var miTopmost = new MenuItem { Header = "常に手前に表示(_T)", IsCheckable = true, IsChecked = App.Settings.Topmost };
+        var miTopmost = new MenuItem { Header = "常に手前に表示(_T)", IsCheckable = true };
         miTopmost.Click += (_, _) =>
         {
-            App.Settings.Topmost = miTopmost.IsChecked;
+            // 開いた時点で同期済みの最新状態を反転(#7)
+            App.Settings.Topmost = !App.Settings.Topmost;
             App.ApplyToAllClocks();
             App.Settings.Save();
         };
 
-        var miClickThrough = new MenuItem { Header = "クリックスルー(_C)", IsCheckable = true, IsChecked = App.Settings.ClickThrough };
+        var miClickThrough = new MenuItem { Header = "クリックスルー(_C)", IsCheckable = true };
         miClickThrough.Click += (_, _) =>
         {
-            App.Settings.ClickThrough = miClickThrough.IsChecked;
+            App.Settings.ClickThrough = !App.Settings.ClickThrough;
             App.ApplyToAllClocks();
             App.Settings.Save();
         };
 
         var miExit = new MenuItem { Header = "終了(_X)" };
-        miExit.Click += (_, _) => Close();
+        // アプリ全体を終了(時計1つの Close ではない)(#8)
+        miExit.Click += (_, _) => Application.Current.Shutdown();
 
-        // メニュー表示中はクリックスルー解除(閉じたら復帰)
-        ClockMenu.Opened += (_, _) => { _menuOpen = true; ApplyClickThrough(); };
+        // メニュー表示中はクリックスルー解除(閉じたら復帰)+ 最新状態へ同期(#7)
+        ClockMenu.Opened += (_, _) =>
+        {
+            _menuOpen = true;
+            ApplyClickThrough();
+            miTopmost.IsChecked = App.Settings.Topmost;
+            miClickThrough.IsChecked = App.Settings.ClickThrough;
+        };
         ClockMenu.Closed += (_, _) => { _menuOpen = false; ApplyClickThrough(); };
 
         ClockMenu.Items.Clear();
@@ -882,6 +909,8 @@ public partial class MainWindow : Window
                     App.BringSettingsToFront();
 
                 DragMove();
+                // ユーザーの手動移動でプリセットを解除(#6: 再起動後も手動位置を維持)
+                App.Settings.PositionPreset = "";
                 // ドラッグ終了時に即保存(強制終了されても位置が残る)
                 SavePosition();
                 App.Settings.Save();
