@@ -23,6 +23,19 @@ public partial class SettingsWindow : Window
 
     private bool _ready;
 
+    /// <summary>指定ヘッダーのタブを選択する(情報タブへのリンク等)。</summary>
+    public void SelectTab(string header)
+    {
+        foreach (var item in SettingsTabControl.Items.OfType<TabItem>())
+        {
+            if ((string)item.Header == header)
+            {
+                item.IsSelected = true;
+                return;
+            }
+        }
+    }
+
     /// <summary>ウィンドウ サイズを表示先モニターの作業領域に収める(#10)。</summary>
     private void ClampToWorkArea()
     {
@@ -77,6 +90,11 @@ public partial class SettingsWindow : Window
             LoadFromSettings();
             _ready = true;
             UpdatePreview();
+            if (App.PendingSettingsTab.Length > 0)
+            {
+                SelectTab(App.PendingSettingsTab);
+                App.PendingSettingsTab = "";
+            }
         };
         LocationChanged += (_, _) => ClampToWorkArea();
     }
@@ -503,31 +521,8 @@ public partial class SettingsWindow : Window
 
     private void OnCancel(object sender, RoutedEventArgs e) => Close();
 
-    /// <summary>HKCU\...\Run への登録。失敗してもクラッシュしない。</summary>
-    private static void ApplyAutoStart(bool enable)
-    {
-        try
-        {
-            const string keyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
-            const string valueName = "TVClockModern";
-            using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(keyPath, writable: true)
-                ?? Microsoft.Win32.Registry.CurrentUser.CreateSubKey(keyPath);
-            if (enable)
-            {
-                var exe = Environment.ProcessPath;
-                if (!string.IsNullOrEmpty(exe))
-                    key.SetValue(valueName, $"\"{exe}\"");
-            }
-            else
-            {
-                key.DeleteValue(valueName, throwOnMissingValue: false);
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.Error("自動起動設定の変更に失敗", ex);
-        }
-    }
+    /// <summary>HKCU Run への登録/解除。実体は App.SetAutoStart。</summary>
+    private static void ApplyAutoStart(bool enable) => App.SetAutoStart(enable);
 
     private void OnPreviewChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         => UpdatePreview();

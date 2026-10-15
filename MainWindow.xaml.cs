@@ -870,6 +870,33 @@ public partial class MainWindow : Window
             App.Settings.Save();
         };
 
+        // 位置プリセット サブメニュー(位置のみ即時反映)
+        var presetMenu = new MenuItem { Header = "位置プリセット(_P)" };
+        foreach (var (label, tag) in new[]
+        {
+            ("左上", "topleft"), ("右上", "topright"),
+            ("左下", "bottomleft"), ("右下", "bottomright"), ("中央", "center"),
+        })
+        {
+            var tag2 = tag;
+            var mi = new MenuItem { Header = label };
+            mi.Click += (_, _) => App.ApplyPositionPreset(tag2);
+            presetMenu.Items.Add(mi);
+        }
+
+        // Windows 自動起動(チェックは開くたびに同期)
+        var miAutoStart = new MenuItem { Header = "Windows 起動時に自動で開始", IsCheckable = true };
+        miAutoStart.Click += (_, _) =>
+        {
+            App.Settings.AutoStart = miAutoStart.IsChecked;
+            App.SetAutoStart(miAutoStart.IsChecked);
+            App.Settings.Save();
+        };
+
+        // このアプリについて(設定画面の情報タブへ)
+        var miAbout = new MenuItem { Header = "このアプリについて(_A)" };
+        miAbout.Click += (_, _) => ShowSettings("情報");
+
         var miExit = new MenuItem { Header = "終了(_X)" };
         // アプリ全体を終了(時計1つの Close ではない)(#8)
         miExit.Click += (_, _) => Application.Current.Shutdown();
@@ -881,11 +908,16 @@ public partial class MainWindow : Window
             ApplyClickThrough();
             miTopmost.IsChecked = App.Settings.Topmost;
             miClickThrough.IsChecked = App.Settings.ClickThrough;
+            miAutoStart.IsChecked = App.Settings.AutoStart;
         };
         ClockMenu.Closed += (_, _) => { _menuOpen = false; ApplyClickThrough(); };
 
         ClockMenu.Items.Clear();
         ClockMenu.Items.Add(miSettings);
+        ClockMenu.Items.Add(presetMenu);
+        ClockMenu.Items.Add(miAutoStart);
+        ClockMenu.Items.Add(miAbout);
+        ClockMenu.Items.Add(new Separator());
         ClockMenu.Items.Add(miTopmost);
         ClockMenu.Items.Add(miClickThrough);
         ClockMenu.Items.Add(new Separator());
@@ -925,14 +957,21 @@ public partial class MainWindow : Window
     private void OnContextMenuRequest(object sender, MouseButtonEventArgs e)
         => ClockMenu.IsOpen = true;
 
-    public void ShowSettings()
+    public void ShowSettings(string initialTab = "")
     {
         try
         {
-            if (App.SettingsWindowOpen) return; // 既に開いている
+            if (App.SettingsWindowOpen)
+            {
+                // 既に開いている場合は前面へ出してタブだけ切り替える
+                App.BringSettingsToFront();
+                if (initialTab.Length > 0) App.SelectSettingsTab(initialTab);
+                return;
+            }
 
             // モードレスで開く(ShowDialogは全ウィンドウを無効化し時計が反応しなくなるため)
             App.SettingsWindowOpen = true;
+            App.PendingSettingsTab = initialTab;
             var dlg = new SettingsWindow();
             dlg.Closed += (_, _) =>
             {

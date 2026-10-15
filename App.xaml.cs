@@ -104,6 +104,49 @@ public partial class App : Application
             Dispatcher.BeginInvoke(() => Clocks.FirstOrDefault()?.ShowSettings());
     }
 
+    /// <summary>Windows 自動起動(HKCU Run)の登録/解除。UI からも共通で使用する。</summary>
+    public static void SetAutoStart(bool enable)
+    {
+        try
+        {
+            const string keyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
+            const string valueName = "TVClockModern";
+            using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(keyPath, writable: true)
+                ?? Microsoft.Win32.Registry.CurrentUser.CreateSubKey(keyPath);
+            if (enable)
+            {
+                var exe = Environment.ProcessPath;
+                if (!string.IsNullOrEmpty(exe))
+                    key.SetValue(valueName, $"\"{exe}\"");
+            }
+            else
+            {
+                key.DeleteValue(valueName, throwOnMissingValue: false);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("自動起動設定の変更に失敗", ex);
+        }
+    }
+
+    /// <summary>設定画面が次に開くときに選択するタブ(例: "情報")。</summary>
+    public static string PendingSettingsTab { get; set; } = "";
+
+    /// <summary>開いている設定画面のタブを切り替える。</summary>
+    public static void SelectSettingsTab(string header)
+    {
+        try
+        {
+            var dlg = Application.Current?.Windows.OfType<SettingsWindow>().FirstOrDefault();
+            dlg?.SelectTab(header);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("タブ切替に失敗", ex);
+        }
+    }
+
     /// <summary>設定画面(開いている場合)を1回だけ前面に上げてから最前面属性を解除する。
     /// 「一瞬全面に出るが、常時最前面にはならない」挙動。</summary>
     public static void BringSettingsToFront()

@@ -18,7 +18,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TabControl Grid.Row="0" Background="Transparent" BorderBrush="#FF555555">
+        <TabControl x:Name="SettingsTabControl" Grid.Row="0" Background="Transparent" BorderBrush="#FF555555">
 
             <!-- ================= 書式タブ ================= -->
             <TabItem Header="書式">
