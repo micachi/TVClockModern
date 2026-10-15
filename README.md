@@ -83,6 +83,8 @@ dotnet publish -c Release -o publish-sc -p:SelfContained=true
 **詳しい使い方は [ユーザーマニュアル](docs/USER_MANUAL.md) を参照してください。**
 (全設定項目の解説、書式指定子一覧、マルチモニタの挙動、トラブルシューティング等)
 
+変更履歴は [CHANGELOG.md](CHANGELOG.md) を参照してください。
+
 ## 免責事項(無保証・現状有姿)
 
 本ソフトウェアは**現状有姿(AS IS)**で提供されます。明示的か暗黙的かを問わず、商品性、特定目的への適合性、非侵害を含むいかなる保証も行いません。

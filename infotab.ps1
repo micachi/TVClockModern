@@ -1,10 +1,10 @@
-﻿param([string]$OutFile = "C:\Users\ukyan\TVClockModern\info-check.png")
+﻿param([string]$OutFile = "C:\Users\ukyan\TVClockModern\ver-check.png")
 Add-Type -AssemblyName UIAutomationClient,UIAutomationTypes,System.Windows.Forms,System.Drawing
 Add-Type @'
 using System;
 using System.Text;
 using System.Runtime.InteropServices;
-public class WCi {
+public class WCv {
   public delegate bool EnumProc(IntPtr h, IntPtr l);
   [DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
   [DllImport("user32.dll")] public static extern bool EnumWindows(EnumProc cb, IntPtr l);
@@ -15,9 +15,8 @@ public class WCi {
   public struct RECT { public int L, T, R, B; }
 };
 '@
-[WCi]::SetProcessDPIAware() | Out-Null
+[WCv]::SetProcessDPIAware() | Out-Null
 
-# 情報タブを選択
 $root = [System.Windows.Automation.AutomationElement]::RootElement
 $nameCond = New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::NameProperty, "TVClock Modern - 設定")
 $dlg = $root.FindFirst([System.Windows.Automation.TreeScope]::Children, $nameCond)
@@ -31,23 +30,22 @@ if ($null -ne $tab) {
 } else { Write-Host "tab not found" }
 Start-Sleep -Milliseconds 800
 
-# 設定ウィンドウをキャプチャ
 $found = [IntPtr]::Zero
-$cb = [WCi+EnumProc]{ param($h, $l)
+$cb = [WCv+EnumProc]{ param($h, $l)
   $sb = New-Object System.Text.StringBuilder 256
-  [WCi]::GetWindowText($h, $sb, 256) | Out-Null
-  if ($sb.ToString() -like "*TVClock Modern - *" -and [WCi]::IsWindowVisible($h)) { $script:found = $h; return $false }
+  [WCv]::GetWindowText($h, $sb, 256) | Out-Null
+  if ($sb.ToString() -like "*TVClock Modern - *" -and [WCv]::IsWindowVisible($h)) { $script:found = $h; return $false }
   return $true
 }
-[WCi]::EnumWindows($cb, [IntPtr]::Zero) | Out-Null
+[WCv]::EnumWindows($cb, [IntPtr]::Zero) | Out-Null
 if ($found -eq [IntPtr]::Zero) { Write-Host "WINDOW-NOT-FOUND"; exit 1 }
-$r = New-Object 'WCi+RECT'
-[WCi]::GetWindowRect($found, [ref]$r) | Out-Null
+$r = New-Object 'WCv+RECT'
+[WCv]::GetWindowRect($found, [ref]$r) | Out-Null
 $w = $r.R - $r.L; $h = $r.B - $r.T
 $bmp = New-Object System.Drawing.Bitmap($w, $h)
 $g = [System.Drawing.Graphics]::FromImage($bmp)
 $dc = $g.GetHdc()
-[WCi]::PrintWindow($found, $dc, 3) | Out-Null
+[WCv]::PrintWindow($found, $dc, 3) | Out-Null
 $g.ReleaseHdc($dc)
 $bmp.Save($OutFile)
 Write-Host ("saved {0}x{1}" -f $w, $h)
