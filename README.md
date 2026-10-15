@@ -34,9 +34,16 @@ Windows デスクトップ常駐のデジタル時計。**クリーンルーム�
 
 ![](docs/shot-settings.png)
 
-**時刻の切り替え効果(せり上げ)** — 秒が変わるたびに数字がスロットのように入れ替わります
+**時刻の切り替え効果** — 秒が変わるたびに数字がアニメーションで入れ替わります(効果時間 50〜500ms):
 
-![](docs/effect-slideup.gif)
+| 効果 | アニメーション |
+|---|---|
+| 横に回転 | ![](docs/effect-flipx.gif) |
+| 縦に回転 | ![](docs/effect-flipy.gif) |
+| せり上げ | ![](docs/effect-slideup.gif) |
+| せり下げ | ![](docs/effect-slidedown.gif) |
+| フェードイン・アウト | ![](docs/effect-fade.gif) |
+| クロスフェード | ![](docs/effect-crossfade.gif) |
 
 ## クラッシュしにくい設計
 
