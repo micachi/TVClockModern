@@ -3,6 +3,10 @@ obj/
 publish/
 publish-sc/
 *.png
+!assets/*.png
+!docs/*.png
+*.gif
+!docs/*.gif
 *.user
 *.suo
 .vs/
