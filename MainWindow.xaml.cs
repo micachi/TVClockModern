@@ -290,16 +290,17 @@ public partial class MainWindow : Window
                 }
                 case "fade":
                 {
-                    // フェードイン・アウト: 古い文字が消えてから新しい文字が出る
+                    // フェードイン・アウト: 古い文字が徐々に消え(等速)、その後新しい文字が出る
+                    // (古い文字のフェードアウトに EaseOut を使うと即座に消えて見えない)
                     tb.Opacity = 0;
                     mainAnim = new DoubleAnimation(0, 1, half)
                     {
-                        BeginTime = half, FillBehavior = FillBehavior.HoldEnd,
+                        BeginTime = half, EasingFunction = ease, FillBehavior = FillBehavior.HoldEnd,
                     };
                     tb.BeginAnimation(OpacityProperty, mainAnim);
                     ghostAnim = new DoubleAnimation(1, 0, half)
                     {
-                        EasingFunction = ease, FillBehavior = FillBehavior.HoldEnd,
+                        FillBehavior = FillBehavior.HoldEnd,
                     };
                     ghost.BeginAnimation(OpacityProperty, ghostAnim);
                     break;
