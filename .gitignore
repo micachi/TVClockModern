@@ -12,3 +12,4 @@ publish-sc/
 .vs/
 *.log
 release-sc/
+gifframes.ps1
