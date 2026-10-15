@@ -915,10 +915,10 @@ public partial class MainWindow : Window
         ClockMenu.Items.Clear();
         ClockMenu.Items.Add(miSettings);
         ClockMenu.Items.Add(presetMenu);
-        ClockMenu.Items.Add(miAutoStart);
         ClockMenu.Items.Add(new Separator());
         ClockMenu.Items.Add(miTopmost);
         ClockMenu.Items.Add(miClickThrough);
+        ClockMenu.Items.Add(miAutoStart);
         ClockMenu.Items.Add(new Separator());
         ClockMenu.Items.Add(miAbout);
         ClockMenu.Items.Add(miExit);
