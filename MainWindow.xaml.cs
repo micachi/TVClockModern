@@ -199,19 +199,65 @@ public partial class MainWindow : Window
             {
                 for (var i = 0; i < text.Length; i++)
                     if (old[i] != text[i])
-                        AnimateCharChange(layers, i, old[i]);
+                        AnimateCharChange(layers, i, old[i], text[i]);
             }
         }
         layers.Host.Visibility = visibility;
     }
 
     /// <summary>変化した1文字の切替効果アニメーション(全レイヤー同時)。</summary>
-    private static void AnimateCharChange(TextLayers layers, int index, char oldChar)
+    private static void AnimateCharChange(TextLayers layers, int index, char oldChar, char newChar)
     {
         var s = App.Settings;
         var dur = TimeSpan.FromMilliseconds(Math.Clamp(s.TransitionDurationMs, 50, 500));
         var half = TimeSpan.FromMilliseconds(dur.TotalMilliseconds / 2);
         var ease = new QuadraticEase { EasingMode = EasingMode.EaseOut };
+
+        // フェードイン・アウトは ghost 不要: 単一 TextBlock で
+        // 「旧文字をフェードアウト → 完了時に新文字へ切替 → フェードイン」を行う。
+        // (ghost の BeginAnimation は状態依存で不安定だったため ghost を使わない)
+        if (s.TransitionEffect == "fade")
+        {
+            var newStr = newChar.ToString();
+
+            foreach (var st in layers.Layers)
+            {
+                if (index >= st.Cells.Count) continue;
+                var cell = st.Cells[index];
+                var tb = (TextBlock)cell.Children[0];
+
+                // 残像があれば除去
+                for (var i = cell.Children.Count - 1; i >= 1; i--)
+                    cell.Children.RemoveAt(i);
+
+                tb.BeginAnimation(OpacityProperty, null);
+                tb.Text = oldChar.ToString();
+                tb.Opacity = 1;
+
+                var outAnim = new DoubleAnimation(1, 0, half)
+                {
+                    FillBehavior = FillBehavior.HoldEnd,
+                };
+                outAnim.Completed += (_, _) =>
+                {
+                    tb.Text = newStr;
+                    tb.BeginAnimation(OpacityProperty, null);
+                    tb.Opacity = 0;
+                    var inAnim = new DoubleAnimation(0, 1, half)
+                    {
+                        EasingFunction = ease, FillBehavior = FillBehavior.HoldEnd,
+                    };
+                    inAnim.Completed += (_, _) =>
+                    {
+                        tb.BeginAnimation(OpacityProperty, null);
+                        tb.Opacity = 1;
+                    };
+                    tb.BeginAnimation(OpacityProperty, inAnim);
+                };
+                tb.BeginAnimation(OpacityProperty, outAnim);
+            }
+            return;
+        }
 
         foreach (var st in layers.Layers)
         {
