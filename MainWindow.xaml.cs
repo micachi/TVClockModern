@@ -232,6 +232,11 @@ public partial class MainWindow : Window
                 Margin = tb.Margin,
             };
 
+            // 重要: ビジュアルツリーに追加してからアニメーションを開始する。
+            // 追加前に BeginAnimation すると、ツリー外の要素にはアニメが適用されず
+            // 旧文字が不透明のまま残る(#フェードのバグ)。
+            cell.Children.Add(ghost);
+
             DoubleAnimation? mainAnim = null;
             DoubleAnimation? ghostAnim = null;
 
@@ -324,8 +329,6 @@ public partial class MainWindow : Window
                 default:
                     return;
             }
-
-            cell.Children.Add(ghost);
 
             var g = ghostAnim;
             g.Completed += (_, _) => cell.Children.Remove(ghost);
