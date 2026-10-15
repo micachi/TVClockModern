@@ -275,10 +275,9 @@ public partial class SettingsWindow : Window
         var letterSp = LetterSpacingSlider?.Value ?? 0;
         var sepSp = SeparatorSpacingSlider?.Value ?? 0;
 
-        // 実時計と同じ文字単位の余白計算を使用(#9)
-        var mainPanel = new StackPanel { Orientation = Orientation.Horizontal };
-        BuildChars(mainPanel, text, family, size, new SolidColorBrush(mainColor), letterSp, sepSp, shadow);
-        host.Children.Add(mainPanel);
+        // レイヤー(縁取り+本体)は同一セルに重ねるため Grid に入れる
+        var layerHost = new Grid();
+        var mainLayer = default(StackPanel);
 
         if (outlineThickness > 0)
         {
@@ -290,9 +289,17 @@ public partial class SettingsWindow : Window
                 var panel = new StackPanel { Orientation = Orientation.Horizontal };
                 panel.RenderTransform = new TranslateTransform(dirs[i, 0] * outlineThickness, dirs[i, 1] * outlineThickness);
                 BuildChars(panel, text, family, size, ob, letterSp, sepSp, shadow: false);
-                host.Children.Add(panel);
+                layerHost.Children.Add(panel);
             }
         }
+
+        var mb = new SolidColorBrush(mainColor);
+        mb.Freeze();
+        mainLayer = new StackPanel { Orientation = Orientation.Horizontal };
+        BuildChars(mainLayer, text, family, size, mb, letterSp, sepSp, shadow);
+        layerHost.Children.Add(mainLayer);
+
+        host.Children.Add(layerHost);
     }
 
     private void BuildChars(StackPanel panel, string text, FontFamily family, double size,
