@@ -492,8 +492,10 @@ public partial class MainWindow : Window
             }
             else
             {
-                // 担当モニタ原点からの相対位置で記憶(モニタ構成変化に強い)
-                if (TryGetWorkingArea(out var wa, out _))
+                // 担当モニタ原点からの相対位置で記憶(モニタ構成変化に強い)。
+                // 時計が担当モニタ以外にドラッグされている間は保存しない
+                // (他モニタ基準の座標で担当モニタの記憶を汚染しない)。
+                if (TryGetWorkingArea(out var wa, out var curDevice) && curDevice == _monitorDevice)
                     s.MonitorPositions[_monitorDevice] = new[]
                     {
                         Math.Round(Left - wa.Left / Dpi, 1),
