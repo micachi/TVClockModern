@@ -62,6 +62,14 @@ public partial class SettingsWindow : Window
     {
         InitializeComponent();
         SourceInitialized += (_, _) => ClampToWorkArea();
+
+        // 情報タブ: バージョン表示
+        try
+        {
+            var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            VersionText.Text = $"v{ver.Major}.{ver.Minor}.{ver.Build}";
+        }
+        catch { VersionText.Text = "v1.0.0"; }
         Loaded += (_, _) =>
         {
             ClampToWorkArea();
@@ -396,6 +404,22 @@ public partial class SettingsWindow : Window
             App.ApplyToAllClocks();
         }
         catch { }
+    }
+
+    private void OnNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+    {
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = e.Uri.AbsoluteUri,
+                UseShellExecute = true,
+            });
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("リンクを開けませんでした", ex);
+        }
     }
 
     private void OnPreset(object sender, RoutedEventArgs e)

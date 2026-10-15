@@ -20,228 +20,291 @@
 
         <TabControl Grid.Row="0" Background="Transparent" BorderBrush="#FF555555">
 
-            <!-- ================= 表示タブ ================= -->
-            <TabItem Header="表示">
+            <!-- ================= 書式タブ ================= -->
+            <TabItem Header="書式">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel Margin="12,12,12,8">
+                    <StackPanel Margin="12,12,12,8">
 
-                    <TextBlock Text="時刻フォーマット" FontWeight="Bold"/>
-                    <ComboBox x:Name="TimeFormatBox" IsEditable="True" Margin="0,4,0,10" SelectionChanged="OnPreviewChanged"/>
+                        <TextBlock Text="時刻フォーマット" FontWeight="Bold"/>
+                        <ComboBox x:Name="TimeFormatBox" IsEditable="True" Margin="0,4,0,10" SelectionChanged="OnPreviewChanged"/>
 
-                    <TextBlock Text="日付フォーマット (空欄で非表示)" FontWeight="Bold"/>
-                    <ComboBox x:Name="DateFormatBox" IsEditable="True" Margin="0,4,0,10" SelectionChanged="OnPreviewChanged"/>
-                    <CheckBox x:Name="ShowDateCheck" Content="日付を表示" Margin="0,0,0,12" Checked="OnPreviewChanged" Unchecked="OnPreviewChanged"/>
+                        <TextBlock Text="日付フォーマット (空欄で非表示)" FontWeight="Bold"/>
+                        <ComboBox x:Name="DateFormatBox" IsEditable="True" Margin="0,4,0,10" SelectionChanged="OnPreviewChanged"/>
+                        <CheckBox x:Name="ShowDateCheck" Content="日付を表示" Margin="0,0,0,12" Checked="OnPreviewChanged" Unchecked="OnPreviewChanged"/>
 
-                    <TextBlock Text="フォント" FontWeight="Bold"/>
-                    <ComboBox x:Name="FontBox" Margin="0,4,0,10" SelectionChanged="OnPreviewChanged"/>
-
-                    <TextBlock Text="フォント サイズ" FontWeight="Bold"/>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="auto"/>
-                        </Grid.ColumnDefinitions>
-                        <Slider x:Name="SizeSlider" Grid.Column="0" Minimum="12" Maximum="200"
-                                SmallChange="1" LargeChange="8" IsMoveToPointEnabled="False"
-                                Margin="0,4,0,10" ValueChanged="OnPreviewChanged"/>
-                        <TextBlock x:Name="SizeValue" Grid.Column="1" VerticalAlignment="Center" MinWidth="36" TextAlignment="Right"/>
-                    </Grid>
-
-                    <TextBlock Text="文字の色" FontWeight="Bold"/>
-                    <StackPanel Orientation="Horizontal" Margin="0,4,0,10">
-                        <Button x:Name="ColorButton" Width="80" Content="選択..." Click="OnPickColor"/>
-                        <Rectangle x:Name="ColorPreview" Width="40" Height="18" Margin="8,0,0,0" RadiusX="3" RadiusY="3"
-                                   Stroke="#FF888888"/>
+                        <TextBlock Text="時刻の切り替え効果" FontWeight="Bold"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition Width="auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ComboBox x:Name="TransitionBox" Grid.Column="0"
+                                      SelectedValuePath="Key" DisplayMemberPath="Value"
+                                      SelectionChanged="OnPreviewChanged" Margin="0,4,0,10"/>
+                            <TextBlock Grid.Column="1" Text="効果時間" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                            <Slider x:Name="TransitionDurationSlider" Grid.Column="2" Minimum="50" Maximum="500" Width="140"
+                                    SmallChange="10" LargeChange="100" IsMoveToPointEnabled="False"
+                                    ValueChanged="OnPreviewChanged" Margin="0,4,0,10"/>
+                            <TextBlock x:Name="TransitionDurationValue" Grid.Column="3" VerticalAlignment="Center" MinWidth="40" TextAlignment="Right"/>
+                        </Grid>
                     </StackPanel>
+                </ScrollViewer>
+            </TabItem>
 
-                    <TextBlock Text="文字間隔 (数字同士の隙間)" FontWeight="Bold"/>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="auto"/>
-                        </Grid.ColumnDefinitions>
-                        <Slider x:Name="LetterSpacingSlider" Grid.Column="0" Minimum="0" Maximum="50"
-                                SmallChange="1" LargeChange="5" IsMoveToPointEnabled="False"
-                                Margin="0,4,0,10" ValueChanged="OnPreviewChanged"/>
-                        <TextBlock x:Name="LetterSpacingValue" Grid.Column="1" VerticalAlignment="Center" MinWidth="36" TextAlignment="Right"/>
-                    </Grid>
+            <!-- ================= 文字タブ ================= -->
+            <TabItem Header="文字">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="12,12,12,8">
 
-                    <TextBlock Text="区切り間隔 (「:」の前後の隙間)" FontWeight="Bold"/>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="auto"/>
-                        </Grid.ColumnDefinitions>
-                        <Slider x:Name="SeparatorSpacingSlider" Grid.Column="0" Minimum="0" Maximum="200"
-                                SmallChange="1" LargeChange="10" IsMoveToPointEnabled="False"
-                                Margin="0,4,0,10" ValueChanged="OnPreviewChanged"/>
-                        <TextBlock x:Name="SeparatorSpacingValue" Grid.Column="1" VerticalAlignment="Center" MinWidth="36" TextAlignment="Right"/>
-                    </Grid>
+                        <TextBlock Text="フォント" FontWeight="Bold"/>
+                        <ComboBox x:Name="FontBox" Margin="0,4,0,10" SelectionChanged="OnPreviewChanged"/>
 
-                    <TextBlock Text="時刻の切り替え効果" FontWeight="Bold"/>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="auto"/>
-                            <ColumnDefinition Width="auto"/>
-                            <ColumnDefinition Width="auto"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition/><RowDefinition/>
-                        </Grid.RowDefinitions>
-                        <ComboBox x:Name="TransitionBox" Grid.Row="0" Grid.Column="0"
-                                  SelectedValuePath="Key" DisplayMemberPath="Value"
-                                  SelectionChanged="OnPreviewChanged" Margin="0,4,0,10"/>
-                        <TextBlock Grid.Row="0" Grid.Column="1" Text="効果時間" VerticalAlignment="Center" Margin="8,0,0,0"/>
-                        <Slider x:Name="TransitionDurationSlider" Grid.Row="0" Grid.Column="2" Minimum="50" Maximum="500" Width="140"
-                                SmallChange="10" LargeChange="100" IsMoveToPointEnabled="False"
-                                ValueChanged="OnPreviewChanged" Margin="0,4,0,10"/>
-                        <TextBlock x:Name="TransitionDurationValue" Grid.Row="0" Grid.Column="3" VerticalAlignment="Center" MinWidth="40" TextAlignment="Right"/>
-                    </Grid>
+                        <TextBlock Text="フォント サイズ" FontWeight="Bold"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Slider x:Name="SizeSlider" Grid.Column="0" Minimum="12" Maximum="200"
+                                    SmallChange="1" LargeChange="8" IsMoveToPointEnabled="False"
+                                    Margin="0,4,0,10" ValueChanged="OnPreviewChanged"/>
+                            <TextBlock x:Name="SizeValue" Grid.Column="1" VerticalAlignment="Center" MinWidth="36" TextAlignment="Right"/>
+                        </Grid>
 
-                    <TextBlock Text="文字の縁取り" FontWeight="Bold"/>
-                    <CheckBox x:Name="OutlineCheck" Content="縁取りを付ける" Checked="OnPreviewChanged" Unchecked="OnPreviewChanged" Margin="0,4,0,4"/>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="90"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="auto"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition/><RowDefinition/>
-                        </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="色" VerticalAlignment="Center"/>
-                        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
-                            <Button x:Name="OutlineColorButton" Width="80" Content="選択..." Click="OnPickOutlineColor"/>
-                            <Rectangle x:Name="OutlineColorPreview" Width="40" Height="18" Margin="8,0,0,0" RadiusX="3" RadiusY="3" Stroke="#FF888888"/>
+                        <TextBlock Text="文字の色" FontWeight="Bold"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,4,0,10">
+                            <Button x:Name="ColorButton" Width="80" Content="選択..." Click="OnPickColor"/>
+                            <Rectangle x:Name="ColorPreview" Width="40" Height="18" Margin="8,0,0,0" RadiusX="3" RadiusY="3"
+                                       Stroke="#FF888888"/>
                         </StackPanel>
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="太さ" VerticalAlignment="Center"/>
-                        <Slider x:Name="OutlineThicknessSlider" Grid.Column="1" Grid.Row="1" Minimum="0.5" Maximum="10"
-                                SmallChange="0.5" LargeChange="1" IsMoveToPointEnabled="False"
-                                ValueChanged="OnPreviewChanged" Margin="0,4,0,10"/>
-                        <TextBlock x:Name="OutlineThicknessValue" Grid.Column="2" Grid.Row="1" Text="2.0" VerticalAlignment="Center" MinWidth="30" TextAlignment="Right"/>
-                    </Grid>
 
-                    <TextBlock Text="影" FontWeight="Bold"/>
-                    <CheckBox x:Name="ShadowCheck" Content="影を付ける" Checked="OnPreviewChanged" Unchecked="OnPreviewChanged" Margin="0,4,0,4"/>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="90"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="auto"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition/><RowDefinition/>
-                        </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="大きさ" VerticalAlignment="Center"/>
-                        <Slider x:Name="ShadowBlurSlider" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="40"
-                                SmallChange="1" LargeChange="4" IsMoveToPointEnabled="False"
-                                ValueChanged="OnPreviewChanged" Margin="0,4,0,8"/>
-                        <TextBlock x:Name="ShadowBlurValue" Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" MinWidth="30" TextAlignment="Right"/>
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="濃さ" VerticalAlignment="Center"/>
-                        <Slider x:Name="ShadowOpacitySlider" Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="1"
-                                SmallChange="0.01" LargeChange="0.05" IsMoveToPointEnabled="False"
-                                ValueChanged="OnPreviewChanged" Margin="0,4,0,10"/>
-                        <TextBlock x:Name="ShadowOpacityValue" Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" MinWidth="30" TextAlignment="Right"/>
-                    </Grid>
+                        <TextBlock Text="文字間隔 (数字同士の隙間)" FontWeight="Bold"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Slider x:Name="LetterSpacingSlider" Grid.Column="0" Minimum="0" Maximum="50"
+                                    SmallChange="1" LargeChange="5" IsMoveToPointEnabled="False"
+                                    Margin="0,4,0,10" ValueChanged="OnPreviewChanged"/>
+                            <TextBlock x:Name="LetterSpacingValue" Grid.Column="1" VerticalAlignment="Center" MinWidth="36" TextAlignment="Right"/>
+                        </Grid>
 
-                    <TextBlock Text="ウィンドウの不透明度 (通常時)" FontWeight="Bold"/>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="auto"/>
-                        </Grid.ColumnDefinitions>
-                        <Slider x:Name="OpacitySlider" Grid.Column="0" Minimum="0.2" Maximum="1"
-                                SmallChange="0.01" LargeChange="0.05" IsMoveToPointEnabled="False"
-                                Margin="0,4,0,4" ValueChanged="OnPreviewChanged"/>
-                        <TextBlock x:Name="OpacityValue" Grid.Column="1" VerticalAlignment="Center" MinWidth="36" TextAlignment="Right"/>
-                    </Grid>
-                </StackPanel>
+                        <TextBlock Text="区切り間隔 (「:」の前後の隙間)" FontWeight="Bold"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Slider x:Name="SeparatorSpacingSlider" Grid.Column="0" Minimum="0" Maximum="200"
+                                    SmallChange="1" LargeChange="10" IsMoveToPointEnabled="False"
+                                    Margin="0,4,0,10" ValueChanged="OnPreviewChanged"/>
+                            <TextBlock x:Name="SeparatorSpacingValue" Grid.Column="1" VerticalAlignment="Center" MinWidth="36" TextAlignment="Right"/>
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ================= 装飾タブ ================= -->
+            <TabItem Header="装飾">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="12,12,12,8">
+
+                        <TextBlock Text="文字の縁取り" FontWeight="Bold"/>
+                        <CheckBox x:Name="OutlineCheck" Content="縁取りを付ける" Checked="OnPreviewChanged" Unchecked="OnPreviewChanged" Margin="0,4,0,4"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="90"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/><RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="色" VerticalAlignment="Center"/>
+                            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+                                <Button x:Name="OutlineColorButton" Width="80" Content="選択..." Click="OnPickOutlineColor"/>
+                                <Rectangle x:Name="OutlineColorPreview" Width="40" Height="18" Margin="8,0,0,0" RadiusX="3" RadiusY="3" Stroke="#FF888888"/>
+                            </StackPanel>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="太さ" VerticalAlignment="Center"/>
+                            <Slider x:Name="OutlineThicknessSlider" Grid.Column="1" Grid.Row="1" Minimum="0.5" Maximum="10"
+                                    SmallChange="0.5" LargeChange="1" IsMoveToPointEnabled="False"
+                                    ValueChanged="OnPreviewChanged" Margin="0,4,0,10"/>
+                            <TextBlock x:Name="OutlineThicknessValue" Grid.Column="2" Grid.Row="1" Text="2.0" VerticalAlignment="Center" MinWidth="30" TextAlignment="Right"/>
+                        </Grid>
+
+                        <TextBlock Text="影" FontWeight="Bold"/>
+                        <CheckBox x:Name="ShadowCheck" Content="影を付ける" Checked="OnPreviewChanged" Unchecked="OnPreviewChanged" Margin="0,4,0,4"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="90"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/><RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="大きさ" VerticalAlignment="Center"/>
+                            <Slider x:Name="ShadowBlurSlider" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="40"
+                                    SmallChange="1" LargeChange="4" IsMoveToPointEnabled="False"
+                                    ValueChanged="OnPreviewChanged" Margin="0,4,0,8"/>
+                            <TextBlock x:Name="ShadowBlurValue" Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" MinWidth="30" TextAlignment="Right"/>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="濃さ" VerticalAlignment="Center"/>
+                            <Slider x:Name="ShadowOpacitySlider" Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="1"
+                                    SmallChange="0.01" LargeChange="0.05" IsMoveToPointEnabled="False"
+                                    ValueChanged="OnPreviewChanged" Margin="0,4,0,10"/>
+                            <TextBlock x:Name="ShadowOpacityValue" Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" MinWidth="30" TextAlignment="Right"/>
+                        </Grid>
+                    </StackPanel>
                 </ScrollViewer>
             </TabItem>
 
             <!-- ================= 動作タブ ================= -->
             <TabItem Header="動作">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel Margin="12,12,12,8">
+                    <StackPanel Margin="12,12,12,8">
 
-                    <TextBlock Text="表示するモニター" FontWeight="Bold"/>
-                    <ComboBox x:Name="MonitorBox" Margin="0,4,0,4"/>
-                    <CheckBox x:Name="AllMonitorsCheck" Content="すべてのモニターに同時表示"
-                              ToolTip="オンにすると各モニタに1つずつ時計を表示します。位置はモニタごとに記憶されます。"
-                              Margin="0,2,0,12"/>
+                        <TextBlock Text="表示するモニター" FontWeight="Bold"/>
+                        <ComboBox x:Name="MonitorBox" Margin="0,4,0,4"/>
+                        <CheckBox x:Name="AllMonitorsCheck" Content="すべてのモニターに同時表示"
+                                  ToolTip="オンにすると各モニタに1つずつ時計を表示します。位置はモニタごとに記憶されます。"
+                                  Margin="0,2,0,12"/>
 
-                    <CheckBox x:Name="TopmostCheck" Content="常に手前に表示" Margin="0,0,0,6"/>
-                    <CheckBox x:Name="ClickThroughCheck" Content="クリックスルー (時計の下を操作可能にする)"
-                              ToolTip="オンにすると時計をクリックできなくなります。透明解除キー(Ctrl等)を押しながらならクリック・右クリックメニューも使えます。タスクトレイアイコンからも解除できます。"
-                              Margin="0,0,0,4"/>
-                    <StackPanel Orientation="Horizontal" Margin="12,0,0,12">
-                        <TextBlock Text="透明解除キー" VerticalAlignment="Center" Margin="0,0,8,0"
-                                   ToolTip="押している間、クリックスルーを解除して完全表示します"/>
-                        <ComboBox x:Name="ModifierBox" Width="110" SelectedValuePath="Key" DisplayMemberPath="Value"/>
-                    </StackPanel>
-                    <CheckBox x:Name="AutoStartCheck" Content="Windows 起動時に自動で開始" Margin="0,0,0,12"/>
+                        <TextBlock Text="位置プリセット" FontWeight="Bold"/>
+                        <WrapPanel Margin="0,4,0,4">
+                            <Button Width="70" Content="左上" Tag="topleft" Click="OnPreset" Margin="0,0,6,4"/>
+                            <Button Width="70" Content="右上" Tag="topright" Click="OnPreset" Margin="0,0,6,4"/>
+                            <Button Width="70" Content="左下" Tag="bottomleft" Click="OnPreset" Margin="0,0,6,4"/>
+                            <Button Width="70" Content="右下" Tag="bottomright" Click="OnPreset" Margin="0,0,6,4"/>
+                            <Button Width="70" Content="中央" Tag="center" Click="OnPreset" Margin="0,0,0,4"/>
+                        </WrapPanel>
+                        <TextBlock Text="※ 位置のみ即時反映されます。他の変更は「適用」まで確定しません。"
+                                   FontSize="11" Foreground="#FF999999" Margin="0,0,0,12"/>
 
-                    <TextBlock Text="位置プリセット" FontWeight="Bold"/>
-                    <WrapPanel Margin="0,4,0,12">
-                        <Button Width="70" Content="左上" Tag="topleft" Click="OnPreset" Margin="0,0,6,4"/>
-                        <Button Width="70" Content="右上" Tag="topright" Click="OnPreset" Margin="0,0,6,4"/>
-                        <Button Width="70" Content="左下" Tag="bottomleft" Click="OnPreset" Margin="0,0,6,4"/>
-                        <Button Width="70" Content="右下" Tag="bottomright" Click="OnPreset" Margin="0,0,6,4"/>
-                        <Button Width="70" Content="中央" Tag="center" Click="OnPreset" Margin="0,0,0,4"/>
-                    </WrapPanel>
+                        <TextBlock Text="ウィンドウの不透明度 (通常時)" FontWeight="Bold"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Slider x:Name="OpacitySlider" Grid.Column="0" Minimum="0.2" Maximum="1"
+                                    SmallChange="0.01" LargeChange="0.05" IsMoveToPointEnabled="False"
+                                    Margin="0,4,0,4" ValueChanged="OnPreviewChanged"/>
+                            <TextBlock x:Name="OpacityValue" Grid.Column="1" VerticalAlignment="Center" MinWidth="36" TextAlignment="Right"/>
+                        </Grid>
 
-                    <TextBlock Text="マウスが近づいたとき" FontWeight="Bold"/>
-                    <CheckBox x:Name="ProximityCheck" Content="有効 (接近したら指定の不透明度へフェード)" Margin="0,4,0,6"/>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="110"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="auto"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
-                        </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="感度 (距離 px)" VerticalAlignment="Center"/>
-                        <Slider x:Name="ProximitySlider" Grid.Row="0" Grid.Column="1" Minimum="10" Maximum="400"
-                                SmallChange="5" LargeChange="20" IsMoveToPointEnabled="False"
-                                ValueChanged="OnPreviewChanged" Margin="0,4,0,8"/>
-                        <TextBlock x:Name="ProximityValue" Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" MinWidth="36" TextAlignment="Right"/>
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="接近時の不透明度" VerticalAlignment="Center"/>
-                        <Slider x:Name="ProximityOpacitySlider" Grid.Row="1" Grid.Column="1" Minimum="0.1" Maximum="1"
-                                SmallChange="0.01" LargeChange="0.05" IsMoveToPointEnabled="False"
-                                ValueChanged="OnPreviewChanged" Margin="0,4,0,8"/>
-                        <TextBlock x:Name="ProximityOpacityValue" Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" MinWidth="36" TextAlignment="Right"/>
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="反応速度" VerticalAlignment="Center"/>
-                        <Slider x:Name="FadeSpeedSlider" Grid.Row="2" Grid.Column="1" Minimum="1" Maximum="10"
-                                SmallChange="1" LargeChange="1" IsMoveToPointEnabled="False"
-                                ValueChanged="OnPreviewChanged" Margin="0,4,0,8"/>
-                        <TextBlock x:Name="FadeSpeedValue" Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" MinWidth="36" TextAlignment="Right"/>
-                        <TextBlock Grid.Row="3" Grid.Column="0" Text="フェードカーブ" VerticalAlignment="Center"/>
-                        <ComboBox x:Name="FadeEasingBox" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2"
-                                  SelectedValuePath="Key" DisplayMemberPath="Value"
+                        <CheckBox x:Name="TopmostCheck" Content="常に手前に表示" Margin="0,8,0,6"/>
+                        <CheckBox x:Name="ClickThroughCheck" Content="クリックスルー (時計の下を操作可能にする)"
+                                  ToolTip="オンにすると時計をクリックできなくなります。透明解除キー(Ctrl等)を押しながらならクリック・右クリックメニューも使えます。タスクトレイアイコンからも解除できます。"
+                                  Margin="0,0,0,4"/>
+                        <StackPanel Orientation="Horizontal" Margin="12,0,0,12">
+                            <TextBlock Text="透明解除キー" VerticalAlignment="Center" Margin="0,0,8,0"
+                                       ToolTip="押している間、クリックスルーを解除して完全表示します"/>
+                            <ComboBox x:Name="ModifierBox" Width="110" SelectedValuePath="Key" DisplayMemberPath="Value"/>
+                        </StackPanel>
+                        <CheckBox x:Name="AutoStartCheck" Content="Windows 起動時に自動で開始" Margin="0,0,0,12"/>
+
+                        <TextBlock Text="マウスが近づいたとき" FontWeight="Bold"/>
+                        <CheckBox x:Name="ProximityCheck" Content="有効 (接近したら指定の不透明度へフェード)" Margin="0,4,0,6"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/><RowDefinition/><RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="感度 (距離 px)" VerticalAlignment="Center"/>
+                            <Slider x:Name="ProximitySlider" Grid.Row="0" Grid.Column="1" Minimum="10" Maximum="400"
+                                    SmallChange="5" LargeChange="20" IsMoveToPointEnabled="False"
+                                    ValueChanged="OnPreviewChanged" Margin="0,4,0,8"/>
+                            <TextBlock x:Name="ProximityValue" Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" MinWidth="36" TextAlignment="Right"/>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="接近時の不透明度" VerticalAlignment="Center"/>
+                            <Slider x:Name="ProximityOpacitySlider" Grid.Row="1" Grid.Column="1" Minimum="0.1" Maximum="1"
+                                    SmallChange="0.01" LargeChange="0.05" IsMoveToPointEnabled="False"
+                                    ValueChanged="OnPreviewChanged" Margin="0,4,0,8"/>
+                            <TextBlock x:Name="ProximityOpacityValue" Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" MinWidth="36" TextAlignment="Right"/>
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="反応速度" VerticalAlignment="Center"/>
+                            <Slider x:Name="FadeSpeedSlider" Grid.Row="2" Grid.Column="1" Minimum="1" Maximum="10"
+                                    SmallChange="1" LargeChange="1" IsMoveToPointEnabled="False"
+                                    ValueChanged="OnPreviewChanged" Margin="0,4,0,10"/>
+                            <TextBlock x:Name="FadeSpeedValue" Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" MinWidth="36" TextAlignment="Right"/>
+                        </Grid>
+                        <TextBlock Text="フェードカーブ" FontWeight="Bold"/>
+                        <ComboBox x:Name="FadeEasingBox" SelectedValuePath="Key" DisplayMemberPath="Value"
                                   SelectionChanged="OnPreviewChanged" Margin="0,4,0,10"/>
-                    </Grid>
-                </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ================= 情報タブ ================= -->
+            <TabItem Header="情報">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="12,12,12,8">
+                        <TextBlock Text="TVClock Modern" FontSize="20" FontWeight="Bold" Margin="0,0,0,2"/>
+                        <TextBlock Text="Windows デスクトップ常駐時計" Foreground="#FF999999" Margin="0,0,0,12"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="バージョン" VerticalAlignment="Center" Margin="0,4,0,4"/>
+                            <TextBlock x:Name="VersionText" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Margin="0,4,0,4"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="作者" VerticalAlignment="Center" Margin="0,4,0,4"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="micachi" VerticalAlignment="Center" Margin="0,4,0,4"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="GitHub" VerticalAlignment="Center" Margin="0,4,0,4"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,4,0,4">
+                                <Hyperlink NavigateUri="https://github.com/micachi/TVClockModern" RequestNavigate="OnNavigate">
+                                    github.com/micachi/TVClockModern
+                                </Hyperlink>
+                            </TextBlock>
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="ライセンス" VerticalAlignment="Center" Margin="0,4,0,4"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,4,0,4">
+                                <Hyperlink NavigateUri="https://github.com/micachi/TVClockModern/blob/main/LICENSE" RequestNavigate="OnNavigate">
+                                    MIT License
+                                </Hyperlink>
+                            </TextBlock>
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="設定ファイル" VerticalAlignment="Center" Margin="0,4,0,4"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" Text="%APPDATA%\TVClockModern\settings.json"
+                                       Foreground="#FF999999" VerticalAlignment="Center" Margin="0,4,0,4"/>
+
+                            <TextBlock Grid.Row="5" Grid.Column="0" Text="ログ" VerticalAlignment="Center" Margin="0,4,0,4"/>
+                            <TextBlock Grid.Row="5" Grid.Column="1" Text="%LOCALAPPDATA%\TVClockModern\logs\"
+                                       Foreground="#FF999999" VerticalAlignment="Center" Margin="0,4,0,4"/>
+                        </Grid>
+
+                        <TextBlock Text="免責事項" FontWeight="Bold" Margin="0,16,0,4"/>
+                        <TextBlock TextWrapping="Wrap" Foreground="#FF999999"
+                                   Text="本ソフトウェアは現状有姿 (AS IS) で提供されます。明示的か暗黙的かを問わず、いかなる保証も行いません。本ソフトウェアの使用または使用不能により生じたいかなる損害についても、作者は一切の責任を負いません。"/>
+                        <TextBlock TextWrapping="Wrap" Foreground="#FF999999" Margin="0,6,0,0"
+                                   Text="本プロジェクトは TVClock 及びその作者とは一切関係ありません。独立したオープンソース実装であり、既存ソフトウェアのコード・リソース・商標を使用していません。"/>
+                    </StackPanel>
                 </ScrollViewer>
             </TabItem>
         </TabControl>
 
         <StackPanel Grid.Row="1" Margin="0,8,0,0">
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                <TextBlock Text="設定の移動: " VerticalAlignment="Center"/>
-                <Button Width="90" Content="エクスポート" Margin="0,0,8,0" Click="OnExport"/>
-                <Button Width="90" Content="インポート" Click="OnImport"/>
-            </StackPanel>
             <TextBlock Text="プレビュー" FontWeight="Bold"/>
             <Border Background="#FF111111" Padding="8" Margin="0,4,0,12" CornerRadius="4" MinHeight="80">
-            <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-                <StackPanel>
-                    <StackPanel x:Name="PreviewTimeHost" Orientation="Horizontal" HorizontalAlignment="Center"/>
-                    <StackPanel x:Name="PreviewDateHost" Orientation="Horizontal" HorizontalAlignment="Center"/>
-                </StackPanel>
-            </Grid>
-        </Border>
+                <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <StackPanel>
+                        <StackPanel x:Name="PreviewTimeHost" Orientation="Horizontal" HorizontalAlignment="Center"/>
+                        <StackPanel x:Name="PreviewDateHost" Orientation="Horizontal" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
         </StackPanel>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
