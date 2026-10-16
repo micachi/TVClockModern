@@ -909,10 +909,10 @@ public partial class MainWindow : Window
     // ---------- 右クリックメニュー ----------
     private void BuildContextMenu()
     {
-        var miSettings = new MenuItem { Header = "設定(_S)" };
+        var miSettings = new MenuItem { Header = L.T("menu.settings") };
         miSettings.Click += (_, _) => ShowSettings();
 
-        var miTopmost = new MenuItem { Header = "常に手前に表示(_T)", IsCheckable = true };
+        var miTopmost = new MenuItem { Header = L.T("menu.topmost"), IsCheckable = true };
         miTopmost.Click += (_, _) =>
         {
             // 開いた時点で同期済みの最新状態を反転(#7)
@@ -921,7 +921,7 @@ public partial class MainWindow : Window
             App.Settings.Save();
         };
 
-        var miClickThrough = new MenuItem { Header = "クリックスルー(_C)", IsCheckable = true };
+        var miClickThrough = new MenuItem { Header = L.T("menu.clickthrough"), IsCheckable = true };
         miClickThrough.Click += (_, _) =>
         {
             App.Settings.ClickThrough = !App.Settings.ClickThrough;
@@ -930,11 +930,12 @@ public partial class MainWindow : Window
         };
 
         // 位置プリセット サブメニュー(位置のみ即時反映)
-        var presetMenu = new MenuItem { Header = "位置プリセット(_P)" };
+        var presetMenu = new MenuItem { Header = L.T("menu.positionPreset") };
         foreach (var (label, tag) in new[]
         {
-            ("左上", "topleft"), ("右上", "topright"),
-            ("左下", "bottomleft"), ("右下", "bottomright"), ("中央", "center"),
+            (L.T("preset.topleft"), "topleft"), (L.T("preset.topright"), "topright"),
+            (L.T("preset.bottomleft"), "bottomleft"), (L.T("preset.bottomright"), "bottomright"),
+            (L.T("preset.center"), "center"),
         })
         {
             var tag2 = tag;
@@ -944,7 +945,7 @@ public partial class MainWindow : Window
         }
 
         // Windows 自動起動(チェックは開くたびに同期)
-        var miAutoStart = new MenuItem { Header = "Windows 起動時に自動で開始", IsCheckable = true };
+        var miAutoStart = new MenuItem { Header = L.T("menu.autostart"), IsCheckable = true };
         miAutoStart.Click += (_, _) =>
         {
             App.Settings.AutoStart = miAutoStart.IsChecked;
@@ -953,10 +954,10 @@ public partial class MainWindow : Window
         };
 
         // このアプリについて(設定画面の情報タブへ)
-        var miAbout = new MenuItem { Header = "このアプリについて(_A)" };
-        miAbout.Click += (_, _) => ShowSettings("情報");
+        var miAbout = new MenuItem { Header = L.T("menu.about") };
+        miAbout.Click += (_, _) => ShowSettings("info");
 
-        var miExit = new MenuItem { Header = "終了(_X)" };
+        var miExit = new MenuItem { Header = L.T("menu.exit") };
         // アプリ全体を終了(時計1つの Close ではない)(#8)
         miExit.Click += (_, _) => Application.Current.Shutdown();
 

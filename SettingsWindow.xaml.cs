@@ -23,17 +23,95 @@ public partial class SettingsWindow : Window
 
     private bool _ready;
 
-    /// <summary>指定ヘッダーのタブを選択する(情報タブへのリンク等)。</summary>
-    public void SelectTab(string header)
+    /// <summary>指定タブキー(format/chars/deco/behavior/info)のタブを選択する(情報タブへのリンク等)。</summary>
+    public void SelectTab(string tabKey)
     {
         foreach (var item in SettingsTabControl.Items.OfType<TabItem>())
         {
-            if ((string)item.Header == header)
+            if ((string)item.Tag == tabKey)
             {
                 item.IsSelected = true;
                 return;
             }
         }
+    }
+
+    /// <summary>全 UI 文字列を現在の言語で設定(App.OnStartup で L.Init 済み)。</summary>
+    private void ApplyLocalization()
+    {
+        Title = "TVClock Modern - " + L.T("settings.title");
+        FormatTab.Header = L.T("tab.format");
+        CharsTab.Header = L.T("tab.chars");
+        DecoTab.Header = L.T("tab.deco");
+        BehaviorTab.Header = L.T("tab.behavior");
+        InfoTab.Header = L.T("tab.info");
+
+        lblTimeFormat.Text = L.T("label.timeFormat");
+        lblDateFormat.Text = L.T("label.dateFormat");
+        ShowDateCheck.Content = L.T("check.showDate");
+        lblTransitionEffect.Text = L.T("label.transitionEffect");
+        lblTransitionDuration.Text = L.T("label.transitionDuration");
+
+        lblFont.Text = L.T("label.font");
+        lblFontSize.Text = L.T("label.fontSize");
+        lblTextColor.Text = L.T("label.textColor");
+        ColorButton.Content = L.T("btn.pick");
+        lblLetterSpacing.Text = L.T("label.letterSpacing");
+        lblSepSpacing.Text = L.T("label.sepSpacing");
+
+        lblOutline.Text = L.T("label.outline");
+        OutlineCheck.Content = L.T("check.outline");
+        lblOutlineColor.Text = L.T("label.color");
+        OutlineColorButton.Content = L.T("btn.pick");
+        lblOutlineThickness.Text = L.T("label.thickness");
+        lblShadow.Text = L.T("label.shadow");
+        ShadowCheck.Content = L.T("check.shadow");
+        lblShadowBlur.Text = L.T("label.size");
+        lblShadowDensity.Text = L.T("label.density");
+
+        lblMonitor.Text = L.T("label.monitor");
+        AllMonitorsCheck.Content = L.T("check.allMonitors");
+        AllMonitorsCheck.ToolTip = L.T("tooltip.allMonitors");
+        lblPositionPreset.Text = L.T("label.positionPreset");
+        PresetTl.Content = L.T("preset.topleft");
+        PresetTr.Content = L.T("preset.topright");
+        PresetBl.Content = L.T("preset.bottomleft");
+        PresetBr.Content = L.T("preset.bottomright");
+        PresetC.Content = L.T("preset.center");
+        notePreset.Text = L.T("note.preset");
+        lblWindowOpacity.Text = L.T("label.windowOpacity");
+        TopmostCheck.Content = L.T("check.topmost");
+        ClickThroughCheck.Content = L.T("check.clickthrough");
+        ClickThroughCheck.ToolTip = L.T("tooltip.clickthrough");
+        lblModifierKey.Text = L.T("label.modifierKey");
+        lblModifierKey.ToolTip = L.T("tooltip.modifierKey");
+        AutoStartCheck.Content = L.T("check.autostart");
+        lblLanguage.Text = L.T("label.language");
+        noteLanguage.Text = L.T("note.language");
+        lblProximity.Text = L.T("label.proximity");
+        ProximityCheck.Content = L.T("check.proximity");
+        lblProximityDistance.Text = L.T("label.proximityDistance");
+        lblProximityOpacity.Text = L.T("label.proximityOpacity");
+        lblFadeSpeed.Text = L.T("label.fadeSpeed");
+        lblFadeCurve.Text = L.T("label.fadeCurve");
+
+        lblAppDesc.Text = L.T("label.appDesc");
+        lblVersion.Text = L.T("label.version");
+        lblAuthor.Text = L.T("label.author");
+        lblLicense.Text = L.T("label.license");
+        lblSettingsFile.Text = L.T("label.settingsFile");
+        lblLogs.Text = L.T("label.logs");
+        lblSettingsTransfer.Text = L.T("label.settingsTransfer");
+        ExportButton.Content = L.T("btn.export");
+        ImportButton.Content = L.T("btn.import");
+        lblSettingsSavedTo.Text = L.T("label.settingsSavedTo");
+        lblDisclaimer.Text = L.T("label.disclaimer");
+        lblDisclaimer1.Text = L.T("text.disclaimer1");
+        lblDisclaimer2.Text = L.T("text.disclaimer2");
+        lblPreview.Text = L.T("label.preview");
+        OkButton.Content = L.T("btn.ok");
+        CancelButton.Content = L.T("btn.cancel");
+        ApplyButton.Content = L.T("btn.apply");
     }
 
     /// <summary>ウィンドウ サイズを表示先モニターの作業領域に収める(#10)。</summary>
@@ -74,6 +152,7 @@ public partial class SettingsWindow : Window
     public SettingsWindow()
     {
         InitializeComponent();
+        ApplyLocalization();
         SourceInitialized += (_, _) => ClampToWorkArea();
 
         // 情報タブ: バージョン表示
@@ -106,14 +185,14 @@ public partial class SettingsWindow : Window
 
     private void LoadMonitorList()
     {
-        var items = new List<MonitorItem> { new("自動 (現在の位置)", "") };
+        var items = new List<MonitorItem> { new(L.T("monitor.auto"), "") };
         try
         {
             var screens = System.Windows.Forms.Screen.AllScreens;
             for (var i = 0; i < screens.Length; i++)
             {
                 var sc = screens[i];
-                var primary = sc.Primary ? " [メイン]" : "";
+                var primary = sc.Primary ? L.T("monitor.main") : "";
                 items.Add(new MonitorItem($"{i + 1}: {sc.Bounds.Width}x{sc.Bounds.Height}{primary}", sc.DeviceName));
             }
         }
@@ -151,13 +230,13 @@ public partial class SettingsWindow : Window
         SeparatorSpacingSlider.Value = s.SeparatorSpacing;
         TransitionBox.ItemsSource = new List<KeyValuePair<string, string>>
         {
-            new("none", "なし"),
-            new("flipx", "横に回転"),
-            new("flipy", "縦に回転"),
-            new("slideup", "せり上げ"),
-            new("slidedown", "せり下げ"),
-            new("fade", "フェードイン・アウト"),
-            new("crossfade", "クロスフェード"),
+            new("none", L.T("effect.none")),
+            new("flipx", L.T("effect.flipx")),
+            new("flipy", L.T("effect.flipy")),
+            new("slideup", L.T("effect.slideup")),
+            new("slidedown", L.T("effect.slidedown")),
+            new("fade", L.T("effect.fade")),
+            new("crossfade", L.T("effect.crossfade")),
         };
         TransitionBox.SelectedValue = s.TransitionEffect;
         TransitionDurationSlider.Value = Math.Clamp(s.TransitionDurationMs, 50, 500);
@@ -175,10 +254,20 @@ public partial class SettingsWindow : Window
             new("Ctrl", "Ctrl"),
             new("Alt", "Alt"),
             new("Shift", "Shift"),
-            new("None", "なし"),
+            new("None", L.T("modifier.none")),
         };
         ModifierBox.SelectedValue = s.ModifierKey;
         AutoStartCheck.IsChecked = s.AutoStart;
+
+        LanguageBox.ItemsSource = new List<KeyValuePair<string, string>>
+        {
+            new("auto", L.T("combo.languageAuto")),
+            new("ja", "日本語"),
+            new("en", "English"),
+            new("zh-Hans", "简体中文"),
+            new("ko", "한국어"),
+        };
+        LanguageBox.SelectedValue = s.Language;
 
         ProximityCheck.IsChecked = s.ProximityEnabled;
         AllMonitorsCheck.IsChecked = s.ShowOnAllMonitors;
@@ -188,9 +277,9 @@ public partial class SettingsWindow : Window
         FadeSpeedSlider.Value = Math.Clamp((int)Math.Round((1110 - s.FadeDurationMs) / 108.0), 1, 10);
         FadeEasingBox.ItemsSource = new List<KeyValuePair<string, string>>
         {
-            new("linear", "リニア (等速)"),
-            new("easeout", "減速 (ぬるっと着地)"),
-            new("easein", "加速 (素早く始まる)"),
+            new("linear", L.T("easing.linear")),
+            new("easeout", L.T("easing.easeout")),
+            new("easein", L.T("easing.easein")),
         };
         FadeEasingBox.SelectedValue = s.FadeEasing;
 
@@ -359,17 +448,16 @@ public partial class SettingsWindow : Window
         // 書式検証(#3): 不正な書式は既存設定を保持し、その旨を通知する
         var tf = string.IsNullOrWhiteSpace(TimeFormatBox.Text) ? "HH:mm" : TimeFormatBox.Text;
         if (ClockSettings.IsValidFormat(tf)) s.TimeFormat = tf;
-        else invalid.Add($"時刻フォーマット ({TimeFormatBox.Text})");
+        else invalid.Add(L.T("invalid.timeFormat", TimeFormatBox.Text));
 
         var df = DateFormatBox.Text ?? "";
         if (df.Length == 0 || ClockSettings.IsValidFormat(df)) s.DateFormat = df;
-        else invalid.Add($"日付フォーマット ({df})");
+        else invalid.Add(L.T("invalid.dateFormat", df));
 
         if (invalid.Count > 0)
         {
             var detail = string.Join("\n", invalid);
-            MessageBox.Show(this,
-                "次の書式が無効のため、以前の値を保持しました:\n" + detail,
+            MessageBox.Show(this, L.T("msg.invalidFormats", detail),
                 "TVClock Modern", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
 
@@ -400,6 +488,7 @@ public partial class SettingsWindow : Window
         s.ProximityOpacity = ProximityOpacitySlider.Value;
         s.FadeDurationMs = Math.Clamp(1110 - (int)FadeSpeedSlider.Value * 108, 30, 1000);
         s.FadeEasing = FadeEasingBox.SelectedValue as string ?? "easeout";
+        s.Language = LanguageBox.SelectedValue as string ?? "auto";
     }
 
     private void ApplyToClock()
@@ -449,8 +538,8 @@ public partial class SettingsWindow : Window
         {
             var dlg = new Microsoft.Win32.SaveFileDialog
             {
-                FileName = "TVClockModern設定.json",
-                Filter = "JSON ファイル|*.json|すべてのファイル|*.*",
+                FileName = L.T("export.defaultName"),
+                Filter = L.T("filter.files"),
                 DefaultExt = ".json",
             };
             if (dlg.ShowDialog() != true) return;
@@ -460,7 +549,7 @@ public partial class SettingsWindow : Window
         catch (Exception ex)
         {
             Logger.Error("設定エクスポートに失敗", ex);
-            MessageBox.Show(this, $"エクスポートに失敗しました:\n{ex.Message}", "TVClock Modern");
+            MessageBox.Show(this, L.T("msg.exportFailed", ex.Message), "TVClock Modern");
         }
     }
 
@@ -470,12 +559,12 @@ public partial class SettingsWindow : Window
         {
             var dlg = new Microsoft.Win32.OpenFileDialog
             {
-                Filter = "JSON ファイル|*.json|すべてのファイル|*.*",
+                Filter = L.T("filter.files"),
             };
             if (dlg.ShowDialog() != true) return;
 
             var imported = JsonSerializer.Deserialize<ClockSettings>(File.ReadAllText(dlg.FileName), JsonOpts);
-            if (imported is null) throw new InvalidDataException("設定ファイルの内容が空です。");
+            if (imported is null) throw new InvalidDataException(L.T("msg.importEmpty"));
             imported.Sanitize();
 
             App.Settings = imported;
@@ -488,7 +577,7 @@ public partial class SettingsWindow : Window
         catch (Exception ex)
         {
             Logger.Error("設定インポートに失敗", ex);
-            MessageBox.Show(this, $"インポートに失敗しました:\n{ex.Message}", "TVClock Modern");
+            MessageBox.Show(this, L.T("msg.importFailed", ex.Message), "TVClock Modern");
         }
     }
 

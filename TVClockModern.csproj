@@ -9,7 +9,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>TVClockModern</RootNamespace>
     <AssemblyName>TVClockModern</AssemblyName>
-    <Version>1.1.1</Version>
+    <Version>1.2.0</Version>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>assets\app.ico</ApplicationIcon>
     <InvariantGlobalization>false</InvariantGlobalization>
@@ -25,6 +25,8 @@
     <Using Remove="System.Windows.Forms" />
     <Using Remove="System.Drawing" />
   </ItemGroup>
+
+  <!-- UI 多言語辞書: StringsData.cs (JSON から生成した C# 辞書) を使用 -->
 
   <!-- WFAC010(高DPI設定をマニフェストから移せという誘導)を抑制する。
        本アプリのUIは WPF であり、WPF の Per-Monitor V2 DPI は app.manifest が正規の

@@ -54,6 +54,13 @@ public partial class App : Application
             args.SetObserved();
         };
 
+        // --- 設定ロード(失敗時もフォールバック済み) ---
+        // 二重起動拒否メッセージの言語判定にも使うため、Mutex 待機の前に読む。
+        // 保存は OnExit/TryRestart で _ownsMutex && _settingsLoaded を確認してから。
+        Settings = ClockSettings.Load();
+        _settingsLoaded = true;
+        L.Init(Settings.Language); // UI 言語(トレイ・メニュー・設定画面の文字列)
+
         // --- 単一インスタンス(再起動競合に備えて最大2秒待機) ---
         var isNew = false;
         var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(2);
@@ -65,7 +72,7 @@ public partial class App : Application
             if (DateTime.UtcNow > deadline)
             {
                 Logger.Info("既存インスタンスがあるため終了");
-                System.Windows.MessageBox.Show("TVClock Modern は既に起動しています。",
+                System.Windows.MessageBox.Show(L.T("msg.alreadyRunning"),
                     "TVClock Modern", MessageBoxButton.OK, MessageBoxImage.Information);
                 Shutdown();
                 return;
@@ -73,10 +80,6 @@ public partial class App : Application
             Thread.Sleep(250); // 前インスタンスの終了を待つ
         }
         _ownsMutex = true;
-
-        // --- 設定ロード(失敗時もフォールバック済み) ---
-        Settings = ClockSettings.Load();
-        _settingsLoaded = true;
 
         base.OnStartup(e);
 
@@ -290,13 +293,13 @@ public partial class App : Application
     {
         var menu = new System.Windows.Forms.ContextMenuStrip();
 
-        var miSettings = new System.Windows.Forms.ToolStripMenuItem("設定(&S)");
+        var miSettings = new System.Windows.Forms.ToolStripMenuItem(L.T("tray.settings"));
         miSettings.Click += (_, _) => Dispatcher.Invoke(() =>
         {
             if (Clocks.Count > 0) Clocks[0].ShowSettings();
         });
 
-        var miTopmost = new System.Windows.Forms.ToolStripMenuItem("常に手前に表示(&T)");
+        var miTopmost = new System.Windows.Forms.ToolStripMenuItem(L.T("tray.topmost"));
         miTopmost.CheckOnClick = true;
         miTopmost.Checked = Settings.Topmost;
         miTopmost.Click += (_, _) =>
@@ -307,7 +310,7 @@ public partial class App : Application
             Settings.Save();
         };
 
-        var miClickThrough = new System.Windows.Forms.ToolStripMenuItem("クリックスルー(&C)");
+        var miClickThrough = new System.Windows.Forms.ToolStripMenuItem(L.T("tray.clickthrough"));
         miClickThrough.CheckOnClick = true;
         miClickThrough.Checked = Settings.ClickThrough;
         miClickThrough.Click += (_, _) =>
@@ -324,10 +327,10 @@ public partial class App : Application
             miClickThrough.Checked = Settings.ClickThrough;
         };
 
-        var miRestart = new System.Windows.Forms.ToolStripMenuItem("再起動(&R)");
+        var miRestart = new System.Windows.Forms.ToolStripMenuItem(L.T("tray.restart"));
         miRestart.Click += (_, _) => TryRestart("ユーザー操作による再起動");
 
-        var miExit = new System.Windows.Forms.ToolStripMenuItem("終了(&X)");
+        var miExit = new System.Windows.Forms.ToolStripMenuItem(L.T("tray.exit"));
         miExit.Click += (_, _) => Shutdown();
 
         menu.Items.AddRange(new System.Windows.Forms.ToolStripItem[]

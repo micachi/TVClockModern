@@ -104,6 +104,8 @@ public sealed class ClockSettings
     /// <summary>クリックスルー中の透明解除キー: Ctrl/Alt/Shift/None</summary>
     public string ModifierKey { get; set; } = "Ctrl";
     public bool ShowOnAllMonitors { get; set; } = false;
+    /// <summary>UI 言語: auto (システム UI カルチャに従う) / ja / en / zh-Hans / ko</summary>
+    public string Language { get; set; } = "auto";
     /// <summary>最後に使った位置プリセット(桁数変化でサイズが変わった時に再整列するのに使う)</summary>
     public string PositionPreset { get; set; } = "";
     /// <summary>マルチモニタ同時表示時のデバイス別位置 [left, top]</summary>
@@ -210,6 +212,8 @@ public sealed class ClockSettings
         if (!validEasings.Contains(FadeEasing)) FadeEasing = "easeout";
         var validMods = new[] { "Ctrl", "Alt", "Shift", "None" };
         if (!validMods.Contains(ModifierKey)) ModifierKey = "Ctrl";
+        var validLanguages = new[] { "auto", "ja", "en", "zh-Hans", "ko" };
+        if (!validLanguages.Contains(Language)) Language = "auto";
         var validEffects = new[] { "none", "flipx", "flipy", "slideup", "slidedown", "fade", "crossfade" };
         if (!validEffects.Contains(TransitionEffect)) TransitionEffect = "crossfade";
 

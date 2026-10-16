@@ -1,3 +1,5 @@
+English | [简体中文](README.zh-Hans.md) | [한국어](README.ko.md) | **日本語**
+
 # TVClock Modern
 
 <p align="center">
