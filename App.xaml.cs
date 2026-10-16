@@ -18,6 +18,7 @@ public partial class App : Application
     public static bool SettingsWindowOpen;
     private System.Windows.Forms.NotifyIcon? _tray;
     private int _dispatchedExceptions;
+    private DateTime _lastExceptionUtc = DateTime.MinValue;
 
     public static ClockSettings Settings { get; set; } = new();
 
@@ -27,6 +28,12 @@ public partial class App : Application
         DispatcherUnhandledException += (_, args) =>
         {
             Logger.Error("Dispatcher 未処理例外", args.Exception);
+            // 累積ではなく「10分以内の連発」でカウント(まばらな珍例外で
+            // 長期常駐中に意図せず再起動しないようにする)
+            var nowUtc = DateTime.UtcNow;
+            if (nowUtc - _lastExceptionUtc > TimeSpan.FromMinutes(10))
+                _dispatchedExceptions = 0;
+            _lastExceptionUtc = nowUtc;
             _dispatchedExceptions++;
             args.Handled = true; // まずは生かす
             if (_dispatchedExceptions > 20)
@@ -47,7 +54,7 @@ public partial class App : Application
             args.SetObserved();
         };
 
-        // --- 単一インスタンス(再起動競合に備えて最大5秒待機) ---
+        // --- 単一インスタンス(再起動競合に備えて最大2秒待機) ---
         var isNew = false;
         var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(2);
         while (true)

@@ -9,6 +9,9 @@ namespace TVClockModern;
 internal static class Logger
 {
     private static readonly object _lock = new();
+    // パージ(古いログ削除)は1時間に1回まで。60Hzポーリング時のログ洪水でも
+    // 書き込みのたびにディレクトリをスキャンしない。
+    private static DateTime _lastPurgeUtc = DateTime.MinValue;
 
     public static string Dir
     {
@@ -43,12 +46,17 @@ internal static class Logger
                 File.AppendAllText(file,
                     $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} [{level}] {message}{Environment.NewLine}");
 
-                // 古いログを削除(7日分だけ保持)
-                foreach (var old in Directory.GetFiles(dir, "app-*.log"))
+                // 古いログを削除(7日分だけ保持/チェックは1時間に1回)
+                var nowUtc = DateTime.UtcNow;
+                if (nowUtc - _lastPurgeUtc > TimeSpan.FromHours(1))
                 {
-                    if (DateTime.Today - File.GetLastWriteTime(old).Date > TimeSpan.FromDays(7))
+                    _lastPurgeUtc = nowUtc;
+                    foreach (var old in Directory.GetFiles(dir, "app-*.log"))
                     {
-                        try { File.Delete(old); } catch { /* 削除失敗は無視 */ }
+                        if (DateTime.Today - File.GetLastWriteTime(old).Date > TimeSpan.FromDays(7))
+                        {
+                            try { File.Delete(old); } catch { /* 削除失敗は無視 */ }
+                        }
                     }
                 }
             }

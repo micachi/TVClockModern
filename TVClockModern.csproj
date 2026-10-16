@@ -9,7 +9,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>TVClockModern</RootNamespace>
     <AssemblyName>TVClockModern</AssemblyName>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>assets\app.ico</ApplicationIcon>
     <InvariantGlobalization>false</InvariantGlobalization>
@@ -25,5 +25,14 @@
     <Using Remove="System.Windows.Forms" />
     <Using Remove="System.Drawing" />
   </ItemGroup>
+
+  <!-- WFAC010(高DPI設定をマニフェストから移せという誘導)を抑制する。
+       本アプリのUIは WPF であり、WPF の Per-Monitor V2 DPI は app.manifest が正規の
+       構成手段。ApplicationHighDpiMode は WinForms 専用で効果がなく、
+       マニフェストから dpiAware を削除するとマルチモニタで滲み・崩れが再発するため
+       マニフェスト側を維持する。 -->
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);WFAC010</NoWarn>
+  </PropertyGroup>
 
 </Project>

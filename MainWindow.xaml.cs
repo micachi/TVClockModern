@@ -409,8 +409,10 @@ public partial class MainWindow : Window
     private void ScheduleNextTick()
     {
         // 次の「秒の境目 + 15ms」まで寝る(5Hzポーリングをやめて1Hzに)
+        var timer = _timer;
+        if (timer is null) return;
         var ms = 1000 - DateTime.Now.Millisecond + 15;
-        _timer.Interval = TimeSpan.FromMilliseconds(ms);
+        timer.Interval = TimeSpan.FromMilliseconds(ms);
     }
 
     private static bool _formatErrorLogged;
@@ -785,7 +787,10 @@ public partial class MainWindow : Window
 
         _proximityTimer = new DispatcherTimer(DispatcherPriority.Background)
         {
-            Interval = TimeSpan.FromMilliseconds(16), // 60Hz ポーリング(反応遅れ最大16ms)
+            // 接近フェードがある時のみ 60Hz(反応遅れ最大16ms)。
+            // 解除キー監視だけなら 30Hz で十分(反応遅れ最大33ms)
+            Interval = TimeSpan.FromMilliseconds(
+                App.Settings.ProximityEnabled ? 16 : 33),
         };
         _proximityTimer.Tick += (_, _) => UpdateInteractionState();
         _proximityTimer.Start();

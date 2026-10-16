@@ -45,6 +45,10 @@ public sealed class MonitorPositionsConverter : JsonConverter<Dictionary<string,
         writer.WriteStartObject();
         foreach (var kv in value)
         {
+            // 異常エントリー(要素数不一致・非有限数)は読み飛ばす(Read の寛容さと対称に)
+            if (kv.Key is null || kv.Value is not { Length: 2 }
+                || !double.IsFinite(kv.Value[0]) || !double.IsFinite(kv.Value[1]))
+                continue;
             writer.WritePropertyName(kv.Key);
             writer.WriteStartArray();
             writer.WriteNumberValue(kv.Value[0]);
@@ -246,13 +250,26 @@ public sealed class ClockSettings
         try
         {
             Directory.CreateDirectory(Dir);
+            var json = JsonSerializer.Serialize(this, JsonOpts);
 
-            // 直前の正常ファイルをバックアップへ
+            // 変更がなければ何も書かない(毎分の自動保存がディスクに触れない)
+            if (File.Exists(MainPath) && File.ReadAllText(MainPath) == json)
+                return;
+
+            // 直前の正常ファイルをバックアップへ(本体と同じく原子的置換。
+            // File.Copy の途中で落ちてもバックアップが半端にならないように)
             if (File.Exists(MainPath))
-                File.Copy(MainPath, BackupPath, overwrite: true);
+            {
+                var bakTmp = BackupPath + ".tmp";
+                File.Copy(MainPath, bakTmp, overwrite: true);
+                if (File.Exists(BackupPath))
+                    File.Replace(bakTmp, BackupPath, null);
+                else
+                    File.Move(bakTmp, BackupPath);
+            }
 
             var tmp = MainPath + ".tmp";
-            File.WriteAllText(tmp, JsonSerializer.Serialize(this, JsonOpts));
+            File.WriteAllText(tmp, json);
 
             if (File.Exists(MainPath))
                 File.Replace(tmp, MainPath, null);

@@ -80,7 +80,7 @@ public partial class SettingsWindow : Window
         try
         {
             var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-            VersionText.Text = $"v{ver.Major}.{ver.Minor}.{ver.Build}";
+            VersionText.Text = ver is null ? "v1.0.0" : $"v{ver.Major}.{ver.Minor}.{ver.Build}";
         }
         catch { VersionText.Text = "v1.0.0"; }
         Loaded += (_, _) =>
