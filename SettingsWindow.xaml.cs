@@ -87,7 +87,6 @@ public partial class SettingsWindow : Window
         lblModifierKey.ToolTip = L.T("tooltip.modifierKey");
         AutoStartCheck.Content = L.T("check.autostart");
         lblLanguage.Text = L.T("label.language");
-        noteLanguage.Text = L.T("note.language");
         lblProximity.Text = L.T("label.proximity");
         ProximityCheck.Content = L.T("check.proximity");
         lblProximityDistance.Text = L.T("label.proximityDistance");
@@ -581,18 +580,29 @@ public partial class SettingsWindow : Window
         }
     }
 
-    private void OnApply(object sender, RoutedEventArgs e)
+    private void ApplyAll()
     {
+        var langBefore = L.CurrentLanguage;
         SaveToSettings();
         ApplyAutoStart(App.Settings.AutoStart);
-        ApplyToClock();
+        if (App.Settings.Language != langBefore)
+        {
+            // 言語変更: 時計ウィンドウを建て直し、トレイ・自分自身も即時再ローカライズ
+            App.ApplyLanguage();
+        }
+        else
+        {
+            ApplyToClock();
+        }
+        ApplyLocalization();
+        LoadFromSettings();
     }
+
+    private void OnApply(object sender, RoutedEventArgs e) => ApplyAll();
 
     private void OnOk(object sender, RoutedEventArgs e)
     {
-        SaveToSettings();
-        ApplyAutoStart(App.Settings.AutoStart);
-        ApplyToClock();
+        ApplyAll();
         Close();
     }
 

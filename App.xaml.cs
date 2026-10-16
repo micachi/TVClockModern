@@ -17,6 +17,7 @@ public partial class App : Application
     /// <summary>設定画面が開いているか(時計クリック時の前面再登場判定用)</summary>
     public static bool SettingsWindowOpen;
     private System.Windows.Forms.NotifyIcon? _tray;
+    private System.Windows.Forms.ToolStripMenuItem? _miSettings, _miTopmost, _miClickThrough, _miRestart, _miExit;
     private int _dispatchedExceptions;
     private DateTime _lastExceptionUtc = DateTime.MinValue;
 
@@ -257,6 +258,76 @@ public partial class App : Application
             c.ApplySettingsFromDialog();
     }
 
+    /// <summary>トレイメニューの文字列を現在の言語で更新(言語切替時に呼ぶ)。</summary>
+    private void UpdateTrayStrings()
+    {
+        try
+        {
+            if (_miSettings is null) return; // InitTray 前は何もしない
+            _miSettings.Text = L.T("tray.settings");
+            _miTopmost!.Text = L.T("tray.topmost");
+            _miClickThrough!.Text = L.T("tray.clickthrough");
+            _miRestart!.Text = L.T("tray.restart");
+            _miExit!.Text = L.T("tray.exit");
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("トレイ文字列の更新に失敗", ex);
+        }
+    }
+
+    /// <summary>言語設定を再読み込みし、トレイ・全時計ウィンドウに即時反映する(UI スレッドで呼ぶ)。</summary>
+    public static void ApplyLanguage()
+    {
+        L.Init(Settings.Language);
+        UpdateTrayStringsStatic();
+        RebuildClocks();
+    }
+
+    private static void UpdateTrayStringsStatic()
+    {
+        if (Application.Current is App app) app.UpdateTrayStrings();
+    }
+
+    /// <summary>
+    /// 全時計ウィンドウを建て直す(言語変更などコンストラクタで決まる文字列の再構築)。
+    /// UI スレッドで呼ぶ。位置は Closing の SavePosition → 新ウィンドウの復元で引き継ぐ。
+    /// </summary>
+    public static void RebuildClocks()
+    {
+        try
+        {
+            Logger.Info("時計ウィンドウを再構築");
+            foreach (var w in Clocks.ToList())
+            {
+                Clocks.Remove(w);
+                w.Close();
+            }
+
+            if (Settings.ShowOnAllMonitors)
+            {
+                foreach (var screen in System.Windows.Forms.Screen.AllScreens)
+                {
+                    var win = new MainWindow(screen.DeviceName);
+                    win.Show();
+                    Clocks.Add(win);
+                }
+                if (Clocks.Count > 0) Application.Current.MainWindow = Clocks[0];
+            }
+            else
+            {
+                var single = new MainWindow();
+                single.Show();
+                Clocks.Add(single);
+                Application.Current.MainWindow = single;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("時計ウィンドウの再構築に失敗", ex);
+        }
+    }
+
     protected override void OnExit(ExitEventArgs e)
     {
         // #1: 設定をロード済みで自分が Mutex を所有している場合だけ保存する。
@@ -339,6 +410,12 @@ public partial class App : Application
             miTopmost, miClickThrough, new System.Windows.Forms.ToolStripSeparator(),
             miRestart, miExit
         });
+
+        _miSettings = miSettings;
+        _miTopmost = miTopmost;
+        _miClickThrough = miClickThrough;
+        _miRestart = miRestart;
+        _miExit = miExit;
 
         _tray = new System.Windows.Forms.NotifyIcon
         {

@@ -204,10 +204,9 @@
                         <CheckBox x:Name="AutoStartCheck" Margin="0,0,0,12"/>
 
                         <TextBlock x:Name="lblLanguage" FontWeight="Bold" Margin="0,0,0,4"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                             <ComboBox x:Name="LanguageBox" Width="180" SelectedValuePath="Key" DisplayMemberPath="Value"/>
                         </StackPanel>
-                        <TextBlock x:Name="noteLanguage" FontSize="11" Foreground="#FF999999" Margin="0,0,0,12"/>
 
                         <TextBlock x:Name="lblProximity" FontWeight="Bold"/>
                         <CheckBox x:Name="ProximityCheck" Margin="0,4,0,6"/>
