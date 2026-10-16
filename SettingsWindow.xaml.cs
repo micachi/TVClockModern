@@ -301,59 +301,47 @@ public partial class SettingsWindow : Window
         var letterSp = LetterSpacingSlider?.Value ?? 0;
         var sepSp = SeparatorSpacingSlider?.Value ?? 0;
 
-        // レイヤー(縁取り+本体)は同一セルに重ねるため Grid に入れる
+        // 縁取り込みの StrokeText を並べる(時計本体と同一の描画方式)
         var layerHost = new Grid();
-        var mainLayer = default(StackPanel);
+        var panel = new StackPanel { Orientation = Orientation.Horizontal };
 
-        if (outlineThickness > 0)
+        if (shadow)
         {
-            var ob = new SolidColorBrush(outlineColor);
-            ob.Freeze();
-            double[,] dirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 }, { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } };
-            for (var i = 0; i < dirs.GetLength(0); i++)
-            {
-                var panel = new StackPanel { Orientation = Orientation.Horizontal };
-                panel.RenderTransform = new TranslateTransform(dirs[i, 0] * outlineThickness, dirs[i, 1] * outlineThickness);
-                BuildChars(panel, text, family, size, ob, letterSp, sepSp, shadow: false);
-                layerHost.Children.Add(panel);
-            }
-        }
-
-        var mb = new SolidColorBrush(mainColor);
-        mb.Freeze();
-        mainLayer = new StackPanel { Orientation = Orientation.Horizontal };
-        BuildChars(mainLayer, text, family, size, mb, letterSp, sepSp, shadow);
-        layerHost.Children.Add(mainLayer);
-
-        host.Children.Add(layerHost);
-    }
-
-    private void BuildChars(StackPanel panel, string text, FontFamily family, double size,
-        Brush brush, double letterSp, double sepSp, bool shadow)
-    {
-        var eff = shadow
-            ? new DropShadowEffect
+            panel.Effect = new DropShadowEffect
             {
                 BlurRadius = ShadowBlurSlider?.Value ?? 6,
                 ShadowDepth = Math.Min(8, (ShadowBlurSlider?.Value ?? 6) / 4),
                 Opacity = ShadowOpacitySlider?.Value ?? 0.85,
                 Color = Colors.Black,
-            }
-            : null;
+            };
+        }
+
+        var mb = new SolidColorBrush(mainColor);
+        mb.Freeze();
+        Brush? ob = null;
+        if (outlineThickness > 0)
+        {
+            var obSolid = new SolidColorBrush(outlineColor);
+            obSolid.Freeze();
+            ob = obSolid;
+        }
 
         for (var i = 0; i < text.Length; i++)
         {
-            var tb = new TextBlock
+            panel.Children.Add(new StrokeText
             {
                 Text = text[i].ToString(),
-                FontFamily = family,
+                Font = family,
                 FontSize = size,
-                Foreground = brush,
+                Fill = mb,
+                OutlineBrush = ob,
+                OutlineThickness = outlineThickness,
                 Margin = CharSpacing.GetCharMargin(text[i], i, text.Length, letterSp, sepSp),
-                Effect = eff,
-            };
-            panel.Children.Add(tb);
+            });
         }
+
+        layerHost.Children.Add(panel);
+        host.Children.Add(layerHost);
     }
 
     private static string SafeFormat(DateTime dt, string format, string fallback)

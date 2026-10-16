@@ -60,7 +60,7 @@ public partial class MainWindow : Window
 
     // ---------- テキスト描画(文字単位: 縁取り+影+間隔+切替効果) ----------
 
-    /// <summary>1レイヤー(本体 or 縁取りの1方向)の状態</summary>
+    /// <summary>1レイヤー(縁取り込みのテキスト)の状態。旧9レイヤーを StrokeText の一要素に統合。</summary>
     private sealed class LayerState
     {
         public StackPanel Panel = new();
@@ -68,6 +68,8 @@ public partial class MainWindow : Window
         public FontFamily Family = new("Yu Gothic UI");
         public double Size = 64;
         public Brush Brush = Brushes.White;
+        public Brush? OutlineBrush;
+        public double OutlineThickness;
     }
 
     private sealed class TextLayers
@@ -109,41 +111,32 @@ public partial class MainWindow : Window
         layers.Layers.Clear();
         layers.LastText = "";
 
-        var thickness = s.OutlineEnabled ? Math.Clamp(s.OutlineThickness, 0.5, 20) : 0;
+        var outlineThickness = s.OutlineEnabled ? Math.Clamp(s.OutlineThickness, 0.5, 20) : 0;
+        var ob = new SolidColorBrush(outlineColor);
+        ob.Freeze();
 
-        void AddLayer(Brush brush, double dx, double dy, bool isMain)
+        // 縁取り込みの単一レイヤー(旧: 本体+8方向コピーの9レイヤー)
+        var st = new LayerState
         {
-            var st = new LayerState { Family = family, Size = size, Brush = brush };
-            st.Panel.Orientation = Orientation.Horizontal; // 文字を横に並べる
-            st.Panel.RenderTransform = new TranslateTransform(dx, dy);
-            layers.Host.Children.Add(st.Panel);
-            layers.Layers.Add(st);
-            if (isMain)
+            Family = family,
+            Size = size,
+            Brush = new SolidColorBrush(mainColor),
+            OutlineBrush = ob,
+            OutlineThickness = outlineThickness,
+        };
+        st.Panel.Orientation = Orientation.Horizontal; // 文字を横に並べる
+        if (s.TextShadow)
+        {
+            st.Panel.Effect = new DropShadowEffect
             {
-                st.Panel.Effect = s.TextShadow
-                    ? new DropShadowEffect
-                    {
-                        BlurRadius = s.ShadowBlur,
-                        ShadowDepth = Math.Min(8, s.ShadowBlur / 4),
-                        Opacity = s.ShadowOpacity,
-                        Color = Colors.Black,
-                    }
-                    : null;
-            }
+                BlurRadius = s.ShadowBlur,
+                ShadowDepth = Math.Min(8, s.ShadowBlur / 4),
+                Opacity = s.ShadowOpacity,
+                Color = Colors.Black,
+            };
         }
-
-        if (thickness > 0)
-        {
-            var ob = new SolidColorBrush(outlineColor);
-            ob.Freeze();
-            double[,] dirs = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 }, { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } };
-            for (var i = 0; i < dirs.GetLength(0); i++)
-                AddLayer(ob, dirs[i, 0] * thickness, dirs[i, 1] * thickness, isMain: false);
-        }
-
-        var mb = new SolidColorBrush(mainColor);
-        mb.Freeze();
-        AddLayer(mb, 0, 0, isMain: true);
+        layers.Host.Children.Add(st.Panel);
+        layers.Layers.Add(st);
     }
 
     /// <summary>レイヤーの文字セルをテキストに同期(桁数変化で再構築)。</summary>
@@ -156,11 +149,13 @@ public partial class MainWindow : Window
             for (var i = 0; i < text.Length; i++)
             {
                 var cell = new Grid { ClipToBounds = true }; // スロット風にクリップ
-                cell.Children.Add(new TextBlock
+                cell.Children.Add(new StrokeText
                 {
-                    FontFamily = st.Family,
+                    Font = st.Family,
                     FontSize = st.Size,
-                    Foreground = st.Brush,
+                    Fill = st.Brush,
+                    OutlineBrush = st.OutlineBrush,
+                    OutlineThickness = st.OutlineThickness,
                 });
                 st.Panel.Children.Add(cell);
                 st.Cells.Add(cell);
@@ -169,8 +164,8 @@ public partial class MainWindow : Window
 
         for (var i = 0; i < text.Length; i++)
         {
-            var tb = (TextBlock)st.Cells[i].Children[0];
-            tb.Text = text[i].ToString();
+            var el = (StrokeText)st.Cells[i].Children[0];
+            el.Text = text[i].ToString();
 
             // 間隔: 区切り文字の前後に区切り間隔、全文字の後に文字間隔
             var isSep = !char.IsLetterOrDigit(text[i]);
@@ -178,7 +173,7 @@ public partial class MainWindow : Window
             var right = (isSep ? sepSp / 2 : 0) + letterSp;
             if (i == 0) left = 0;
             if (i == text.Length - 1) right = 0;
-            tb.Margin = new Thickness(left, 0, right, 0);
+            el.Margin = new Thickness(left, 0, right, 0);
         }
     }
 
@@ -224,7 +219,7 @@ public partial class MainWindow : Window
             {
                 if (index >= st.Cells.Count) continue;
                 var cell = st.Cells[index];
-                var tb = (TextBlock)cell.Children[0];
+                var tb = (StrokeText)cell.Children[0];
 
                 // 残像があれば除去
                 for (var i = cell.Children.Count - 1; i >= 1; i--)
@@ -263,18 +258,20 @@ public partial class MainWindow : Window
         {
             if (index >= st.Cells.Count) continue;
             var cell = st.Cells[index];
-            var tb = (TextBlock)cell.Children[0];
+            var tb = (StrokeText)cell.Children[0];
 
             // 古い残像があれば除去
             for (var i = cell.Children.Count - 1; i >= 1; i--)
                 cell.Children.RemoveAt(i);
 
-            var ghost = new TextBlock
+            var ghost = new StrokeText
             {
                 Text = oldChar.ToString(),
-                FontFamily = st.Family,
+                Font = st.Family,
                 FontSize = st.Size,
-                Foreground = st.Brush,
+                Fill = st.Brush,
+                OutlineBrush = st.OutlineBrush,
+                OutlineThickness = st.OutlineThickness,
                 Margin = tb.Margin,
             };
 
