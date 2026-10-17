@@ -99,5 +99,15 @@
   "export.defaultName": "TVClockModernSettings.json",
   "msg.exportFailed": "Export failed:\n{0}",
   "msg.importFailed": "Import failed:\n{0}",
-  "msg.importEmpty": "The settings file is empty."
+  "msg.importEmpty": "The settings file is empty.",
+  "check.updates": "Check for updates on startup",
+  "label.updateSection": "Updates",
+  "btn.checkUpdate": "Check for updates",
+  "btn.checking": "Checking...",
+  "msg.updateAvailable": "New version v{0} is available.",
+  "msg.upToDate": "You are on the latest version.",
+  "msg.updateCheckFailed": "Failed to check for updates.",
+  "balloon.updateTitle": "New version of TVClock Modern",
+  "balloon.updateBody": "v{0} is available. Click to open the release page.",
+  "btn.openRelease": "Open download page"
 }

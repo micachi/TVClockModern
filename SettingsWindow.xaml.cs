@@ -86,6 +86,7 @@ public partial class SettingsWindow : Window
         lblModifierKey.Text = L.T("label.modifierKey");
         lblModifierKey.ToolTip = L.T("tooltip.modifierKey");
         AutoStartCheck.Content = L.T("check.autostart");
+        CheckUpdatesCheck.Content = L.T("check.updates");
         lblLanguage.Text = L.T("label.language");
         lblProximity.Text = L.T("label.proximity");
         ProximityCheck.Content = L.T("check.proximity");
@@ -101,6 +102,9 @@ public partial class SettingsWindow : Window
         lblSettingsFile.Text = L.T("label.settingsFile");
         lblLogs.Text = L.T("label.logs");
         lblSettingsTransfer.Text = L.T("label.settingsTransfer");
+        lblUpdateSection.Text = L.T("label.updateSection");
+        CheckUpdateButton.Content = L.T("btn.checkUpdate");
+        OpenReleaseButton.Content = L.T("btn.openRelease");
         ExportButton.Content = L.T("btn.export");
         ImportButton.Content = L.T("btn.import");
         lblSettingsSavedTo.Text = L.T("label.settingsSavedTo");
@@ -257,6 +261,7 @@ public partial class SettingsWindow : Window
         };
         ModifierBox.SelectedValue = s.ModifierKey;
         AutoStartCheck.IsChecked = s.AutoStart;
+        CheckUpdatesCheck.IsChecked = s.CheckUpdates;
 
         LanguageBox.ItemsSource = new List<KeyValuePair<string, string>>
         {
@@ -267,6 +272,7 @@ public partial class SettingsWindow : Window
             new("ko", "한국어"),
         };
         LanguageBox.SelectedValue = s.Language;
+        UpdateUpdateStatus(App.NewVersion is not null ? "known" : "idle");
 
         ProximityCheck.IsChecked = s.ProximityEnabled;
         AllMonitorsCheck.IsChecked = s.ShowOnAllMonitors;
@@ -438,6 +444,64 @@ public partial class SettingsWindow : Window
         catch { return dt.ToString(fallback); }
     }
 
+    // ---------- 更新確認 ----------
+    private bool _updateChecking;
+
+    /// <summary>情報タブの更新ステータス表示を更新する。</summary>
+    private void UpdateUpdateStatus(string state)
+    {
+        var v = App.NewVersion;
+        if (v is not null)
+        {
+            lblUpdateStatus.Text = L.T("msg.updateAvailable", v);
+            OpenReleaseButton.Visibility = Visibility.Visible;
+        }
+        else if (state == "done")
+        {
+            lblUpdateStatus.Text = L.T("msg.upToDate");
+            OpenReleaseButton.Visibility = Visibility.Collapsed;
+        }
+        else if (state == "failed")
+        {
+            lblUpdateStatus.Text = L.T("msg.updateCheckFailed");
+            OpenReleaseButton.Visibility = Visibility.Collapsed;
+        }
+        else
+        {
+            lblUpdateStatus.Text = "";
+            OpenReleaseButton.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    private async void OnCheckUpdate(object sender, RoutedEventArgs e)
+    {
+        if (_updateChecking) return;
+        _updateChecking = true;
+        CheckUpdateButton.IsEnabled = false;
+        CheckUpdateButton.Content = L.T("btn.checking");
+        lblUpdateStatus.Text = "";
+
+        string? newTag = null;
+        var failed = false;
+        try
+        {
+            newTag = await UpdateChecker.GetLatestVersionAsync();
+            if (newTag is not null) App.NewVersion = newTag;
+        }
+        catch (Exception ex)
+        {
+            failed = true;
+            Logger.Error("更新確認に失敗", ex);
+        }
+
+        _updateChecking = false;
+        CheckUpdateButton.IsEnabled = true;
+        CheckUpdateButton.Content = L.T("btn.checkUpdate");
+        UpdateUpdateStatus(failed ? "failed" : "done");
+    }
+
+    private void OnOpenRelease(object sender, RoutedEventArgs e) => App.OpenReleasePage();
+
     // ---------- 適用 / OK / キャンセル ----------
     private void SaveToSettings()
     {
@@ -481,6 +545,7 @@ public partial class SettingsWindow : Window
         s.ShowOnAllMonitors = AllMonitorsCheck.IsChecked == true;
         s.TextColor = CurrentColorHex(ColorPreview);
         s.AutoStart = AutoStartCheck.IsChecked == true;
+        s.CheckUpdates = CheckUpdatesCheck.IsChecked == true;
 
         s.ProximityEnabled = ProximityCheck.IsChecked == true;
         s.ProximityDistance = (int)ProximitySlider.Value;
@@ -570,6 +635,9 @@ public partial class SettingsWindow : Window
             App.Settings.Save();
             ApplyAutoStart(App.Settings.AutoStart);
             ApplyToClock();
+            // インポートで言語が変わっていた場合はここでも即時反映
+            if (L.CurrentLanguage != App.Settings.Language)
+                App.ApplyLanguage();
             LoadFromSettings(); // ダイアログUIも新しい設定に同期
             Logger.Info($"設定をインポート: {dlg.FileName}");
         }

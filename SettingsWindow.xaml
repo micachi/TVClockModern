@@ -201,7 +201,8 @@
                             <TextBlock x:Name="lblModifierKey" VerticalAlignment="Center" Margin="0,0,8,0"/>
                             <ComboBox x:Name="ModifierBox" Width="110" SelectedValuePath="Key" DisplayMemberPath="Value"/>
                         </StackPanel>
-                        <CheckBox x:Name="AutoStartCheck" Margin="0,0,0,12"/>
+                        <CheckBox x:Name="AutoStartCheck" Margin="0,0,0,6"/>
+                        <CheckBox x:Name="CheckUpdatesCheck" Margin="0,0,0,12"/>
 
                         <TextBlock x:Name="lblLanguage" FontWeight="Bold" Margin="0,0,0,4"/>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
@@ -286,6 +287,13 @@
                             <TextBlock Grid.Row="5" Grid.Column="1" Text="%LOCALAPPDATA%\TVClockModern\logs\"
                                        Foreground="#FF999999" VerticalAlignment="Center" Margin="0,4,0,4"/>
                         </Grid>
+
+                        <TextBlock x:Name="lblUpdateSection" FontWeight="Bold" Margin="0,12,0,4"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <Button x:Name="CheckUpdateButton" Width="120" Click="OnCheckUpdate"/>
+                        </StackPanel>
+                        <TextBlock x:Name="lblUpdateStatus" TextWrapping="Wrap" Foreground="#FF999999"/>
+                        <Button x:Name="OpenReleaseButton" Width="180" Margin="0,4,0,0" Visibility="Collapsed" Click="OnOpenRelease"/>
 
                         <TextBlock x:Name="lblSettingsTransfer" FontWeight="Bold" Margin="0,16,0,4"/>
                         <StackPanel Orientation="Horizontal">

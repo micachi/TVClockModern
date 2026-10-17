@@ -21,6 +21,7 @@ Built with .NET 8 / WPF. Single exe, resident, low overhead, and designed to res
 - **Transition effects**: horizontal flip / vertical flip / slide up / slide down / fade in-out / crossfade
 - **Mouse-proximity fade**: becomes transparent when the mouse approaches. A transparency-release key (Ctrl, etc.) makes it temporarily interactive
 - **Click-through**: interact with what's beneath the clock (you can't get locked out — the tray icon is always accessible)
+- **Update notifications**: checks GitHub Releases once every 24h at startup; balloon notification + About tab, with a link to the release page
 - **Position presets**: top-left / top-right / bottom-left / bottom-right / center. Automatically realigns when the digit count changes
 - **Settings import / export**: carried as JSON
 

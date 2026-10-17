@@ -21,6 +21,46 @@ public partial class App : Application
     private int _dispatchedExceptions;
     private DateTime _lastExceptionUtc = DateTime.MinValue;
 
+    /// <summary>確認済みの新バージョンタグ(未確認/null)。情報タブのバナーとバルーンで使用。</summary>
+    public static string? NewVersion;
+
+    /// <summary>リリースページを既定ブラウザで開く。</summary>
+    public static void OpenReleasePage()
+    {
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = UpdateChecker.ReleaseUrl,
+                UseShellExecute = true,
+            });
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("リリースページを開けませんでした", ex);
+        }
+    }
+
+    /// <summary>起動時の更新確認(24h に 1 回)。失敗しても黙って継続する。</summary>
+    private async Task CheckForUpdatesInBackground()
+    {
+        try
+        {
+            var tag = await UpdateChecker.GetLatestVersionAsync();
+            if (tag is null) return;
+            NewVersion = tag;
+            await Dispatcher.InvokeAsync(() =>
+            {
+                _tray?.ShowBalloonTip(10000, L.T("balloon.updateTitle"),
+                    L.T("balloon.updateBody", tag), System.Windows.Forms.ToolTipIcon.Info);
+            });
+        }
+        catch (Exception ex)
+        {
+            Logger.Info("更新確認に失敗(無視): " + ex.Message);
+        }
+    }
+
     public static ClockSettings Settings { get; set; } = new();
 
     protected override void OnStartup(StartupEventArgs e)
@@ -86,6 +126,10 @@ public partial class App : Application
 
         try { InitTray(); }
         catch (Exception ex) { Logger.Error("タスクトレイ初期化失敗", ex); }
+
+        // 起動時の更新確認(24h に 1 回、設定 OFF ならスキップ)。失敗は無視。
+        if (UpdateChecker.ShouldCheck())
+            _ = CheckForUpdatesInBackground();
 
         // 起動時にウィンドウセットを構築(単一 or 全モニタ)
         Dispatcher.BeginInvoke(() =>
@@ -428,6 +472,12 @@ public partial class App : Application
         {
             if (Clocks.Count > 0) Clocks[0].ShowSettings();
         });
+
+        // バルーン通知クリックでリリースページを開く(更新確認済みのときのみ)
+        _tray.BalloonTipClicked += (_, _) =>
+        {
+            if (NewVersion is not null) OpenReleasePage();
+        };
 
         // モニタ構成変化でウィンドウセットを同期
         Microsoft.Win32.SystemEvents.DisplaySettingsChanged += (_, _) =>

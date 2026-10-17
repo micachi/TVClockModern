@@ -99,5 +99,15 @@
   "export.defaultName": "TVClockModern設定.json",
   "msg.exportFailed": "エクスポートに失敗しました:\n{0}",
   "msg.importFailed": "インポートに失敗しました:\n{0}",
-  "msg.importEmpty": "設定ファイルの内容が空です。"
+  "msg.importEmpty": "設定ファイルの内容が空です。",
+  "check.updates": "起動時に更新を確認",
+  "label.updateSection": "アップデート",
+  "btn.checkUpdate": "更新を確認",
+  "btn.checking": "確認中...",
+  "msg.updateAvailable": "新しいバージョン v{0} が利用可能です。",
+  "msg.upToDate": "最新バージョンです。",
+  "msg.updateCheckFailed": "更新の確認に失敗しました。",
+  "balloon.updateTitle": "TVClock Modern の新バージョン",
+  "balloon.updateBody": "v{0} が利用可能です。クリックでリリースページを開きます。",
+  "btn.openRelease": "ダウンロードページを開く"
 }
