@@ -22,6 +22,7 @@ public partial class SettingsWindow : Window
     };
 
     private bool _ready;
+    private System.Windows.Threading.DispatcherTimer? _previewTimer;
 
     /// <summary>指定タブキー(format/chars/deco/behavior/info)のタブを選択する(情報タブへのリンク等)。</summary>
     public void SelectTab(string tabKey)
@@ -180,6 +181,11 @@ public partial class SettingsWindow : Window
             }
         };
         LocationChanged += (_, _) => ClampToWorkArea();
+        // プレビューの時刻を毎秒更新(実時計と同じ表示に保つ)
+        _previewTimer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _previewTimer.Tick += (_, _) => UpdatePreview();
+        _previewTimer.Start();
+        Closed += (_, _) => _previewTimer.Stop();
     }
 
     private sealed record MonitorItem(string Name, string Device)

@@ -73,7 +73,7 @@
                             <TextBlock x:Name="SizeValue" Grid.Column="1" VerticalAlignment="Center" MinWidth="36" TextAlignment="Right"/>
                         </Grid>
 
-                        <CheckBox x:Name="BoldCheck" Margin="0,0,0,12"/>
+                        <CheckBox x:Name="BoldCheck" Margin="0,0,0,12" Checked="OnPreviewChanged" Unchecked="OnPreviewChanged"/>
 
                         <TextBlock x:Name="lblTextColor" FontWeight="Bold"/>
                         <StackPanel Orientation="Horizontal" Margin="0,4,0,10">
