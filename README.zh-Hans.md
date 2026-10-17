@@ -1,5 +1,7 @@
 # TVClock Modern
 
+📖 用户手册：[简体中文](docs/USER_MANUAL.zh-Hans.md) / [日本語](docs/USER_MANUAL.md) / [English](docs/USER_MANUAL.en.md) / [한국어](docs/USER_MANUAL.ko.md)
+
 <p align="center">
   <img src="assets/icon-512.png" width="128" alt="TVClock Modern">
 </p>
@@ -22,6 +24,7 @@
 - **鼠标接近淡化**：鼠标靠近时变透明。按下透明解除键（Ctrl 等）可临时进行操作
 - **点击穿透**：可操作时钟下方的窗口（托盘图标始终可用，因此不会被"锁在外面"）
 - **更新通知**：每 24 小时在启动时自动检查一次 GitHub Releases。气泡通知＋“信息”页签，可前往发布页面
+- **多语言界面**：日本語 / English / 简体中文 / 한국어（在“行为”页签切换，立即生效）
 - **位置预设**：左上 / 右上 / 左下 / 右下 / 居中。位数变化时自动重新对齐
 - **设置导入 / 导出**：以 JSON 格式随身携带
 

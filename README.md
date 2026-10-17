@@ -1,5 +1,7 @@
 English | [简体中文](README.zh-Hans.md) | [한국어](README.ko.md) | **日本語**
 
+📖 [ユーザーマニュアル](docs/USER_MANUAL.md) — User Manual: [English](docs/USER_MANUAL.en.md) / [简体中文](docs/USER_MANUAL.zh-Hans.md) / [한국어](docs/USER_MANUAL.ko.md)
+
 # TVClock Modern
 
 <p align="center">
@@ -24,6 +26,7 @@ Windows デスクトップ常駐のデジタル時計。**クリーンルーム�
 - **マウス接近フェード**: 接近時に透明化。透明解除キー(Ctrl 等)で一時的に操作可能に
 - **クリックスルー**: 時計の下を操作可能(トレイから常にアクセス可能なので閉じ込められない)
 - **更新通知**: GitHub Releases を 24h に 1 回自動確認。バルーン通知＋情報タブから確認、リリースページへ
+- **多言語UI**: 日本語 / English / 简体中文 / 한국語(動作タブで切替、即時反映)
 - **位置プリセット**: 左上 / 右上 / 左下 / 右下 / 中央。桁数変化でも自動再整列
 - **設定のインポート / エクスポート**: JSON で持ち運び
 

@@ -110,6 +110,8 @@ public sealed class ClockSettings
     public bool CheckUpdates { get; set; } = true;
     /// <summary>最終更新確認時刻 (UTC, ISO 8601)。空または不正値=未確認</summary>
     public string LastUpdateCheck { get; set; } = "";
+    /// <summary>検出済みの未対応新バージョンタグ(通知の再起動後維持用)。空=なし</summary>
+    public string PendingUpdate { get; set; } = "";
     /// <summary>最後に使った位置プリセット(桁数変化でサイズが変わった時に再整列するのに使う)</summary>
     public string PositionPreset { get; set; } = "";
     /// <summary>マルチモニタ同時表示時のデバイス別位置 [left, top]</summary>

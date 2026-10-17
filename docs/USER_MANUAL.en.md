@@ -1,6 +1,6 @@
 # TVClock Modern User Manual
 
-Covers version 1.0.0
+Covers version 1.3.0
 
 ---
 
@@ -191,6 +191,20 @@ When off, the clock can be hidden behind other windows.
 As described above. Registers the current exe path in the registry.
 **If you move the exe, check this again and apply.**
 
+### Check for updates on startup
+
+When checked, the app queries GitHub Releases for a new version at startup (at most once every 24 hours).
+When a new version is found, a tray notification appears and it is also shown on the "About" tab of the settings window.
+Clicking the notification or the button on the About tab opens the release page (download). Nothing is downloaded automatically.
+Offline starts fail silently — no error is shown — and no telemetry is sent.
+
+### Language
+
+Selects the user interface language (menus and settings window): 日本語 / English / 简体中文 / 한국어.
+The default, "Auto (follow system)", follows the Windows display language.
+Changes apply to all windows immediately. Date and weekday names follow the Windows regional format.
+
+
 ### When Mouse Approaches
 
 | Item | Description |
@@ -275,6 +289,7 @@ From "Settings Transfer" at the bottom of the settings screen:
 
 - **Export**: saves the current settings to a JSON file (for carrying to other PCs)
 - **Import**: loads settings from a JSON file and applies them immediately
+The Export/Import buttons live on the About tab of the settings window. The About tab also shows the current version, and offers a Check-for-updates button (with a tray notification when a new version is found) and a button to open the release page.
 
 Exported files can also be edited in a text editor (if corrupted, import falls back to defaults).
 

@@ -494,6 +494,10 @@ public partial class SettingsWindow : Window
             Logger.Error("更新確認に失敗", ex);
         }
 
+        // 記録は UI スレッドで(settings.json の保存競合を避ける)
+        UpdateChecker.MarkChecked();
+        if (newTag is not null) App.Settings.PendingUpdate = newTag;
+
         _updateChecking = false;
         CheckUpdateButton.IsEnabled = true;
         CheckUpdateButton.Content = L.T("btn.checkUpdate");

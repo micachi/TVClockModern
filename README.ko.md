@@ -1,5 +1,7 @@
 # TVClock Modern
 
+📖 사용 설명서: [한국어](docs/USER_MANUAL.ko.md) / [日本語](docs/USER_MANUAL.md) / [English](docs/USER_MANUAL.en.md) / [简体中文](docs/USER_MANUAL.zh-Hans.md)
+
 <p align="center">
   <img src="assets/icon-512.png" width="128" alt="TVClock Modern">
 </p>
@@ -22,6 +24,7 @@ Windows 데스크톱에 상주하는 디지털 시계입니다. **클린룸 방�
 - **마우스 근접 페이드**: 마우스가 가까워지면 투명해집니다. 투명 해제 키(Ctrl 등)로 일시적으로 조작 가능
 - **클릭 스루**: 시계 아래를 조작 가능(트레이에서 항상 접근할 수 있으므로 갇히지 않습니다)
 - **업데이트 알림**: 24시간에 한 번 시작 시 GitHub Releases를 자동 확인. 풍선 알림＋정보 탭에서 확인, 릴리스 페이지로 이동
+- **다국어 UI**: 日本語 / English / 简体中文 / 한국어(동작 탭에서 전환, 즉시 적용)
 - **위치 프리셋**: 좌상단 / 우상단 / 좌하단 / 우하단 / 가운데. 자릿수 변화 시 자동 재정렬
 - **설정 가져오기 / 내보내기**: JSON으로 휴대 가능
 

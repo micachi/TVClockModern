@@ -1,5 +1,7 @@
 # TVClock Modern
 
+📖 User Manual: [English](docs/USER_MANUAL.en.md) / [日本語](docs/USER_MANUAL.md) / [简体中文](docs/USER_MANUAL.zh-Hans.md) / [한국어](docs/USER_MANUAL.ko.md)
+
 <p align="center">
   <img src="assets/icon-512.png" width="128" alt="TVClock Modern">
 </p>
@@ -22,6 +24,7 @@ Built with .NET 8 / WPF. Single exe, resident, low overhead, and designed to res
 - **Mouse-proximity fade**: becomes transparent when the mouse approaches. A transparency-release key (Ctrl, etc.) makes it temporarily interactive
 - **Click-through**: interact with what's beneath the clock (you can't get locked out — the tray icon is always accessible)
 - **Update notifications**: checks GitHub Releases once every 24h at startup; balloon notification + About tab, with a link to the release page
+- **Multilingual UI**: 日本語 / English / 简体中文 / 한국어 (switch on the Behavior tab, applied instantly)
 - **Position presets**: top-left / top-right / bottom-left / bottom-right / center. Automatically realigns when the digit count changes
 - **Settings import / export**: carried as JSON
 

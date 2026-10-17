@@ -23,7 +23,6 @@ public partial class App : Application
 
     /// <summary>確認済みの新バージョンタグ(未確認/null)。情報タブのバナーとバルーンで使用。</summary>
     public static string? NewVersion;
-
     /// <summary>リリースページを既定ブラウザで開く。</summary>
     public static void OpenReleasePage()
     {
@@ -44,21 +43,27 @@ public partial class App : Application
     /// <summary>起動時の更新確認(24h に 1 回)。失敗しても黙って継続する。</summary>
     private async Task CheckForUpdatesInBackground()
     {
+        string? tag = null;
         try
         {
-            var tag = await UpdateChecker.GetLatestVersionAsync();
-            if (tag is null) return;
-            NewVersion = tag;
-            await Dispatcher.InvokeAsync(() =>
-            {
-                _tray?.ShowBalloonTip(10000, L.T("balloon.updateTitle"),
-                    L.T("balloon.updateBody", tag), System.Windows.Forms.ToolTipIcon.Info);
-            });
+            tag = await UpdateChecker.GetLatestVersionAsync();
         }
         catch (Exception ex)
         {
             Logger.Info("更新確認に失敗(無視): " + ex.Message);
+            return;
         }
+
+        // 設定への記録(記録時刻・検出タグ)は UI スレッドで行う
+        await Dispatcher.InvokeAsync(() =>
+        {
+            UpdateChecker.MarkChecked();
+            if (tag is null) return;
+            App.Settings.PendingUpdate = tag;
+            NewVersion = tag;
+            _tray?.ShowBalloonTip(10000, L.T("balloon.updateTitle"),
+                L.T("balloon.updateBody", tag), System.Windows.Forms.ToolTipIcon.Info);
+        });
     }
 
     public static ClockSettings Settings { get; set; } = new();
@@ -127,8 +132,16 @@ public partial class App : Application
         try { InitTray(); }
         catch (Exception ex) { Logger.Error("タスクトレイ初期化失敗", ex); }
 
-        // 起動時の更新確認(24h に 1 回、設定 OFF ならスキップ)。失敗は無視。
-        if (UpdateChecker.ShouldCheck())
+        // 更新確認: ①設定に未対応の新バージョンタグが残っていれば再通知(再起動後も維持)
+        // ②なければ 24h に 1 回、GitHub Releases を確認(設定 OFF ならスキップ)。失敗は無視。
+        var pending = UpdateChecker.GetPendingUpdate();
+        if (pending is not null)
+        {
+            NewVersion = pending;
+            _tray?.ShowBalloonTip(10000, L.T("balloon.updateTitle"),
+                L.T("balloon.updateBody", pending), System.Windows.Forms.ToolTipIcon.Info);
+        }
+        else if (UpdateChecker.ShouldCheck())
             _ = CheckForUpdatesInBackground();
 
         // 起動時にウィンドウセットを構築(単一 or 全モニタ)
