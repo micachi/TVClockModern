@@ -106,6 +106,8 @@ public sealed class ClockSettings
     public bool ShowOnAllMonitors { get; set; } = false;
     /// <summary>UI 言語: auto (システム UI カルチャに従う) / ja / en / zh-Hans / ko</summary>
     public string Language { get; set; } = "auto";
+    /// <summary>文字の太さ: normal / semibold / bold / extrabold</summary>
+    public string FontWeight { get; set; } = "normal";
     /// <summary>起動時に更新を確認する</summary>
     public bool CheckUpdates { get; set; } = true;
     /// <summary>最終更新確認時刻 (UTC, ISO 8601)。空または不正値=未確認</summary>
@@ -220,6 +222,8 @@ public sealed class ClockSettings
         if (!validMods.Contains(ModifierKey)) ModifierKey = "Ctrl";
         var validLanguages = new[] { "auto", "ja", "en", "zh-Hans", "ko" };
         if (!validLanguages.Contains(Language)) Language = "auto";
+        var validWeights = new[] { "normal", "semibold", "bold", "extrabold" };
+        if (!validWeights.Contains(FontWeight)) FontWeight = "normal";
         var validEffects = new[] { "none", "flipx", "flipy", "slideup", "slidedown", "fade", "crossfade" };
         if (!validEffects.Contains(TransitionEffect)) TransitionEffect = "crossfade";
 

@@ -1,6 +1,6 @@
 # TVClock Modern User Manual
 
-Covers version 1.3.0
+Covers version 1.4.0
 
 ---
 
@@ -114,6 +114,18 @@ See [6. Date and Time Format Specifiers](#6-date-and-time-format-specifiers) for
 ### Font / Font Size
 
 Select from fonts installed on the system. Size range is 12–200.
+
+### Font weight
+
+| Value | Description |
+|---|---|
+| Regular | Standard weight |
+| Semi-bold | Slightly bolder (SemiBold) |
+| Bold | Bold |
+| Extra bold | Boldest (ExtraBold) |
+
+If the selected font does not provide the weight, WPF falls back to the closest available one. The setting applies to both the time and the date.
+
 
 ### Text Color
 

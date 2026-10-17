@@ -73,6 +73,9 @@
                             <TextBlock x:Name="SizeValue" Grid.Column="1" VerticalAlignment="Center" MinWidth="36" TextAlignment="Right"/>
                         </Grid>
 
+                        <TextBlock x:Name="lblFontWeight" FontWeight="Bold"/>
+                        <ComboBox x:Name="WeightBox" Margin="0,4,0,10" SelectedValuePath="Key" DisplayMemberPath="Value" SelectionChanged="OnPreviewChanged"/>
+
                         <TextBlock x:Name="lblTextColor" FontWeight="Bold"/>
                         <StackPanel Orientation="Horizontal" Margin="0,4,0,10">
                             <Button x:Name="ColorButton" Width="80" Click="OnPickColor"/>

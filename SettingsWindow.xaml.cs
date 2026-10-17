@@ -54,6 +54,7 @@ public partial class SettingsWindow : Window
 
         lblFont.Text = L.T("label.font");
         lblFontSize.Text = L.T("label.fontSize");
+        lblFontWeight.Text = L.T("label.fontWeight");
         lblTextColor.Text = L.T("label.textColor");
         ColorButton.Content = L.T("btn.pick");
         lblLetterSpacing.Text = L.T("label.letterSpacing");
@@ -229,6 +230,14 @@ public partial class SettingsWindow : Window
         if (FontBox.SelectedItem is null) FontBox.Text = s.FontFamily;
 
         SizeSlider.Value = Math.Clamp(s.FontSize, 12, 200);
+        WeightBox.ItemsSource = new List<KeyValuePair<string, string>>
+        {
+            new("normal", L.T("weight.normal")),
+            new("semibold", L.T("weight.semibold")),
+            new("bold", L.T("weight.bold")),
+            new("extrabold", L.T("weight.extrabold")),
+        };
+        WeightBox.SelectedValue = s.FontWeight;
         LetterSpacingSlider.Value = s.LetterSpacing;
         SeparatorSpacingSlider.Value = s.SeparatorSpacing;
         TransitionBox.ItemsSource = new List<KeyValuePair<string, string>>
@@ -391,6 +400,7 @@ public partial class SettingsWindow : Window
     private void BuildPreviewText(StackPanel host, string text, FontFamily family, double size,
         Color mainColor, Color outlineColor, double outlineThickness, bool shadow)
     {
+        var weight = StrokeText.ParseWeight(App.Settings.FontWeight);
         host.Children.Clear();
         var letterSp = LetterSpacingSlider?.Value ?? 0;
         var sepSp = SeparatorSpacingSlider?.Value ?? 0;
@@ -427,6 +437,7 @@ public partial class SettingsWindow : Window
                 Text = text[i].ToString(),
                 Font = family,
                 FontSize = size,
+                Weight = weight,
                 Fill = mb,
                 OutlineBrush = ob,
                 OutlineThickness = outlineThickness,
@@ -530,6 +541,7 @@ public partial class SettingsWindow : Window
 
         s.FontFamily = string.IsNullOrWhiteSpace(FontBox.Text) ? "Yu Gothic UI" : FontBox.Text;
         s.FontSize = SizeSlider.Value;
+        s.FontWeight = WeightBox.SelectedValue as string ?? "normal";
         s.LetterSpacing = LetterSpacingSlider.Value;
         s.SeparatorSpacing = SeparatorSpacingSlider.Value;
         s.TransitionEffect = TransitionBox.SelectedValue as string ?? "crossfade";

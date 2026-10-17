@@ -27,6 +27,10 @@ internal sealed class StrokeText : FrameworkElement
         new FrameworkPropertyMetadata(64.0, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.AffectsMeasure),
         v => (double)v > 0);
 
+    public static readonly DependencyProperty WeightProperty = DependencyProperty.Register(
+        nameof(Weight), typeof(FontWeight), typeof(StrokeText),
+        new FrameworkPropertyMetadata(FontWeights.Normal, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.AffectsMeasure));
+
     public static readonly DependencyProperty FillProperty = DependencyProperty.Register(
         nameof(Fill), typeof(Brush), typeof(StrokeText),
         new FrameworkPropertyMetadata(Brushes.White, FrameworkPropertyMetadataOptions.AffectsRender));
@@ -49,6 +53,13 @@ internal sealed class StrokeText : FrameworkElement
     {
         get => (FontFamily)GetValue(FontFamilyProperty);
         set => SetValue(FontFamilyProperty, value);
+    }
+
+    /// <summary>文字の太さ。設定の文字列からの変換は ParseWeight を使用。</summary>
+    public FontWeight Weight
+    {
+        get => (FontWeight)GetValue(WeightProperty);
+        set => SetValue(WeightProperty, value);
     }
 
     public double FontSize
@@ -103,11 +114,20 @@ internal sealed class StrokeText : FrameworkElement
             Text,
             CultureInfo.CurrentCulture,
             FlowDirection.LeftToRight,
-            new Typeface(Font, FontStyles.Normal, FontWeights.Normal, FontStretches.Normal),
+            new Typeface(Font, FontStyles.Normal, Weight, FontStretches.Normal),
             FontSize,
             Fill ?? Brushes.Transparent,
             dpi);
     }
+
+    /// <summary>設定の太さキー(normal/semibold/bold/extrabold)を FontWeight へ変換する。</summary>
+    public static FontWeight ParseWeight(string? key) => key switch
+    {
+        "semibold" => FontWeights.SemiBold,
+        "bold" => FontWeights.Bold,
+        "extrabold" => FontWeights.ExtraBold,
+        _ => FontWeights.Normal,
+    };
 
     protected override Size MeasureOverride(Size availableSize)
     {

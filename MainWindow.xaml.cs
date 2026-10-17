@@ -67,6 +67,7 @@ public partial class MainWindow : Window
         public List<Grid> Cells = new();
         public FontFamily Family = new("Yu Gothic UI");
         public double Size = 64;
+        public FontWeight Weight = FontWeights.Normal;
         public Brush Brush = Brushes.White;
         public Brush? OutlineBrush;
         public double OutlineThickness;
@@ -93,8 +94,9 @@ public partial class MainWindow : Window
         _timeLayers.Host = TimeHost;
         _dateLayers.Host = DateHost;
 
-        RebuildLayers(_timeLayers, family, s.FontSize, textColor, outlineColor);
-        RebuildLayers(_dateLayers, family, Math.Max(12, s.FontSize * 0.35), textColor, outlineColor);
+        var weight = StrokeText.ParseWeight(s.FontWeight);
+        RebuildLayers(_timeLayers, family, s.FontSize, textColor, outlineColor, weight);
+        RebuildLayers(_dateLayers, family, Math.Max(12, s.FontSize * 0.35), textColor, outlineColor, weight);
     }
 
     private static Color ParseColor(string hex, Color fallback)
@@ -104,7 +106,7 @@ public partial class MainWindow : Window
     }
 
     private static void RebuildLayers(TextLayers layers, FontFamily family, double size,
-        Color mainColor, Color outlineColor)
+        Color mainColor, Color outlineColor, FontWeight weight)
     {
         var s = App.Settings;
         layers.Host.Children.Clear();
@@ -120,6 +122,7 @@ public partial class MainWindow : Window
         {
             Family = family,
             Size = size,
+            Weight = weight,
             Brush = new SolidColorBrush(mainColor),
             OutlineBrush = ob,
             OutlineThickness = outlineThickness,
@@ -153,6 +156,7 @@ public partial class MainWindow : Window
                 {
                     Font = st.Family,
                     FontSize = st.Size,
+                    Weight = st.Weight,
                     Fill = st.Brush,
                     OutlineBrush = st.OutlineBrush,
                     OutlineThickness = st.OutlineThickness,
@@ -269,6 +273,7 @@ public partial class MainWindow : Window
                 Text = oldChar.ToString(),
                 Font = st.Family,
                 FontSize = st.Size,
+                Weight = st.Weight,
                 Fill = st.Brush,
                 OutlineBrush = st.OutlineBrush,
                 OutlineThickness = st.OutlineThickness,

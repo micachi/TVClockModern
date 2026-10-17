@@ -119,6 +119,11 @@ internal static class StringsData
         ["balloon.updateTitle"] = "TVClock Modern の新バージョン",
         ["balloon.updateBody"] = "v{0} が利用可能です。クリックでリリースページを開きます。",
         ["btn.openRelease"] = "ダウンロードページを開く",
+        ["label.fontWeight"] = "文字の太さ",
+        ["weight.normal"] = "通常",
+        ["weight.semibold"] = "中太",
+        ["weight.bold"] = "太字",
+        ["weight.extrabold"] = "極太",
     };
 
     public static readonly System.Collections.Generic.Dictionary<string, string> StringsEn = new()
@@ -234,6 +239,11 @@ internal static class StringsData
         ["balloon.updateTitle"] = "New version of TVClock Modern",
         ["balloon.updateBody"] = "v{0} is available. Click to open the release page.",
         ["btn.openRelease"] = "Open download page",
+        ["label.fontWeight"] = "Font weight",
+        ["weight.normal"] = "Regular",
+        ["weight.semibold"] = "Semi-bold",
+        ["weight.bold"] = "Bold",
+        ["weight.extrabold"] = "Extra bold",
     };
 
     public static readonly System.Collections.Generic.Dictionary<string, string> StringsZhHans = new()
@@ -349,6 +359,11 @@ internal static class StringsData
         ["balloon.updateTitle"] = "TVClock Modern 新版本",
         ["balloon.updateBody"] = "v{0} 可用。单击打开发布页面。",
         ["btn.openRelease"] = "打开下载页面",
+        ["label.fontWeight"] = "字重",
+        ["weight.normal"] = "常规",
+        ["weight.semibold"] = "半粗",
+        ["weight.bold"] = "粗体",
+        ["weight.extrabold"] = "特粗",
     };
 
     public static readonly System.Collections.Generic.Dictionary<string, string> StringsKo = new()
@@ -464,6 +479,11 @@ internal static class StringsData
         ["balloon.updateTitle"] = "TVClock Modern 새 버전",
         ["balloon.updateBody"] = "v{0} 사용 가능. 클릭하여 릴리스 페이지를 엽니다.",
         ["btn.openRelease"] = "다운로드 페이지 열기",
+        ["label.fontWeight"] = "글자 굵기",
+        ["weight.normal"] = "보통",
+        ["weight.semibold"] = "반굵게",
+        ["weight.bold"] = "굵게",
+        ["weight.extrabold"] = "아주 굵게",
     };
 
 }

@@ -109,5 +109,10 @@
   "msg.updateCheckFailed": "更新の確認に失敗しました。",
   "balloon.updateTitle": "TVClock Modern の新バージョン",
   "balloon.updateBody": "v{0} が利用可能です。クリックでリリースページを開きます。",
-  "btn.openRelease": "ダウンロードページを開く"
+  "btn.openRelease": "ダウンロードページを開く",
+  "label.fontWeight": "文字の太さ",
+  "weight.normal": "通常",
+  "weight.semibold": "中太",
+  "weight.bold": "太字",
+  "weight.extrabold": "極太"
 }
