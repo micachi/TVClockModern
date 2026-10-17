@@ -115,93 +115,11 @@ See [6. Date and Time Format Specifiers](#6-date-and-time-format-specifiers) for
 
 Select from fonts installed on the system. Size range is 12–200.
 
-### Font weight
+### Bold
 
-| Value | Description |
-|---|---|
-| Regular | Standard weight |
-| Semi-bold | Slightly bolder (SemiBold) |
-| Bold | Bold |
-| Extra bold | Boldest (ExtraBold) |
+When checked, both the time and the date are rendered in bold.
+Some fonts do not provide a bold face (in that case WPF falls back to the closest weight).
 
-If the selected font does not provide the weight, WPF falls back to the closest available one. The setting applies to both the time and the date.
-
-
-### Text Color
-
-Specified in the color picker dialog.
-
-### Letter Spacing / Separator Spacing
-
-- **Letter spacing**: gap between digits (0–50)
-- **Separator spacing**: padding around separators such as ":" (0–200)
-- Monospace font + letter spacing 0 is the most compact
-
-### Time Change Effect / Effect Duration
-
-Animation when the seconds or minutes change.
-
-| Effect | Motion |
-|---|---|
-| None | Instant switch |
-| Rotate horizontally | Old digits squash on the vertical axis, new digits unfold |
-| Rotate vertically | Flip on the horizontal axis |
-| Slide up | Old digits exit upward, new digits rise from below (slot-machine style) |
-| Slide down | Slot machine in the reverse direction |
-| Fade in/out | Old digits disappear, then new ones appear |
-| Cross-fade | Overlap and cross-fade |
-
-Effect duration is 50–500 ms. Longer is flashier; shorter is snappier.
-
-### Text Outline
-
-Adds an outline of a specified color around the text (effective for readability on light wallpapers).
-Color and thickness (0.5–10) can be specified.
-
-### Shadow
-
-Adds a shadow to the text. Size (blur radius 0–40) and opacity (0–1) can be specified.
-
-### Window Opacity (Normal)
-
-Overall opacity of the clock. 0.2–1.0.
-When "Mouse proximity fade" is used, this is also the opacity **while the mouse is away**.
-
-(Found in the "When mouse approaches" section of the Behavior tab.)
-
----
-
-## 5. Settings Reference (Behavior Tab)
-
-### Monitor to Display On
-
-- **Auto (current position)**: shows at the saved position (traditional behavior)
-- **Specific monitor**: places it in the work area of the selected monitor (excluding the taskbar)
-
-### Show on All Monitors Simultaneously
-
-When enabled, **one clock is displayed per monitor**.
-
-- Each clock's position is remembered per monitor
-- Automatically follows monitors being added, removed, or disconnected
-- The "Monitor to Display On" setting is ignored
-
-### Always on Top
-
-When off, the clock can be hidden behind other windows.
-
-### Click-through / Transparency-Bypass Key
-
-- Click-through: passes mouse operations in the clock's area through to windows below
-- While the transparency-bypass key (Ctrl / Alt / Shift / None) is held down:
-  - Click-through is temporarily disabled and the clock is clickable
-  - Semi-transparency is cancelled and the clock is fully visible
-  - The right-click menu is also available
-
-### Start automatically when Windows starts
-
-As described above. Registers the current exe path in the registry.
-**If you move the exe, check this again and apply.**
 
 ### Check for updates on startup
 

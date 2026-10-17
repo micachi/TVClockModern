@@ -110,9 +110,5 @@
   "balloon.updateTitle": "New version of TVClock Modern",
   "balloon.updateBody": "v{0} is available. Click to open the release page.",
   "btn.openRelease": "Open download page",
-  "label.fontWeight": "Font weight",
-  "weight.normal": "Regular",
-  "weight.semibold": "Semi-bold",
-  "weight.bold": "Bold",
-  "weight.extrabold": "Extra bold"
+  "check.bold": "Bold"
 }

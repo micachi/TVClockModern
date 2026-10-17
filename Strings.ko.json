@@ -110,9 +110,5 @@
   "balloon.updateTitle": "TVClock Modern 새 버전",
   "balloon.updateBody": "v{0} 사용 가능. 클릭하여 릴리스 페이지를 엽니다.",
   "btn.openRelease": "다운로드 페이지 열기",
-  "label.fontWeight": "글자 굵기",
-  "weight.normal": "보통",
-  "weight.semibold": "반굵게",
-  "weight.bold": "굵게",
-  "weight.extrabold": "아주 굵게"
+  "check.bold": "굵게"
 }

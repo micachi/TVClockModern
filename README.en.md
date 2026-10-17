@@ -20,7 +20,7 @@ Built with .NET 8 / WPF. Single exe, resident, low overhead, and designed to res
 - **Multi-monitor support**: simultaneous display on all monitors, monitor selection, automatic adaptation to monitor configuration changes, Per-Monitor V2 DPI
 - **Rich display**: font / size / color / outline / shadow / opacity / free-format time & date formats
 - **Per-character rendering**: adjustable character spacing and separator spacing
-- **Font weight**: Regular / Semi-bold / Bold / Extra bold (applies to both the time and the date)
+- **Bold**: optionally render the time and the date in bold (Text tab)
 - **Transition effects**: horizontal flip / vertical flip / slide up / slide down / fade in-out / crossfade
 - **Mouse-proximity fade**: becomes transparent when the mouse approaches. A transparency-release key (Ctrl, etc.) makes it temporarily interactive
 - **Click-through**: interact with what's beneath the clock (you can't get locked out — the tray icon is always accessible)
