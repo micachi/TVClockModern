@@ -110,5 +110,6 @@
   "balloon.updateTitle": "New version of TVClock Modern",
   "balloon.updateBody": "v{0} is available. Click to open the release page.",
   "btn.openRelease": "Open download page",
-  "check.bold": "Bold"
+  "check.bold": "Bold",
+  "label.previewBg": "Preview background"
 }

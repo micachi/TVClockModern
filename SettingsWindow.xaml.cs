@@ -114,6 +114,8 @@ public partial class SettingsWindow : Window
         lblDisclaimer1.Text = L.T("text.disclaimer1");
         lblDisclaimer2.Text = L.T("text.disclaimer2");
         lblPreview.Text = L.T("label.preview");
+        lblPreviewBg.Text = L.T("label.previewBg");
+        PreviewBgButton.Content = L.T("btn.pick");
         OkButton.Content = L.T("btn.ok");
         CancelButton.Content = L.T("btn.cancel");
         ApplyButton.Content = L.T("btn.apply");
@@ -298,6 +300,8 @@ public partial class SettingsWindow : Window
 
         UpdateColorPreview(ColorPreview, s.TextColor);
         UpdateColorPreview(OutlineColorPreview, s.OutlineColor);
+        UpdateColorPreview(PreviewBgPreview, s.PreviewBackground);
+        UpdatePreviewBackground(s.PreviewBackground);
         UpdatePreview();
     }
 
@@ -352,6 +356,22 @@ public partial class SettingsWindow : Window
     {
         try { preview.Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex)); }
         catch { preview.Fill = Brushes.White; }
+    }
+
+    /// <summary>プレビュー黒枠の背景を設定する(不正値は既定の中間グレーへフォールバック)。</summary>
+    private void UpdatePreviewBackground(string hex)
+    {
+        try { PreviewBorder.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex)); }
+        catch { PreviewBorder.Background = new SolidColorBrush(Color.FromRgb(0x80, 0x80, 0x80)); }
+    }
+
+    private void OnPickPreviewBg(object sender, RoutedEventArgs e)
+    {
+        if (PickColor(App.Settings.PreviewBackground) is { } hex)
+        {
+            UpdateColorPreview(PreviewBgPreview, hex);
+            UpdatePreviewBackground(hex);
+        }
     }
 
     // ---------- プレビュー ----------
@@ -561,6 +581,7 @@ public partial class SettingsWindow : Window
         s.TextColor = CurrentColorHex(ColorPreview);
         s.AutoStart = AutoStartCheck.IsChecked == true;
         s.CheckUpdates = CheckUpdatesCheck.IsChecked == true;
+        s.PreviewBackground = CurrentColorHex(PreviewBgPreview);
 
         s.ProximityEnabled = ProximityCheck.IsChecked == true;
         s.ProximityDistance = (int)ProximitySlider.Value;

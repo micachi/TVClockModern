@@ -312,9 +312,20 @@
             </TabItem>
         </TabControl>
 
-        <StackPanel Grid.Row="1" Margin="0,8,0,0">
-            <TextBlock x:Name="lblPreview" FontWeight="Bold"/>
-            <Border Background="#FF111111" Padding="8" Margin="0,4,0,12" CornerRadius="4" MinHeight="80">
+        <Grid Grid.Row="1" Margin="0,8,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0" Margin="0,0,0,4">
+                <TextBlock x:Name="lblPreview" FontWeight="Bold" HorizontalAlignment="Left"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock x:Name="lblPreviewBg" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="#FF999999"/>
+                    <Button x:Name="PreviewBgButton" Width="60" Click="OnPickPreviewBg"/>
+                    <Rectangle x:Name="PreviewBgPreview" Width="40" Height="18" Margin="8,0,0,0" RadiusX="3" RadiusY="3" Stroke="#FF888888"/>
+                </StackPanel>
+            </Grid>
+            <Border x:Name="PreviewBorder" Grid.Row="1" Background="#FF808080" Padding="8" Margin="0,0,0,12" CornerRadius="4" MinHeight="80">
                 <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                     <StackPanel>
                         <StackPanel x:Name="PreviewTimeHost" Orientation="Horizontal" HorizontalAlignment="Center"/>
@@ -322,7 +333,7 @@
                     </StackPanel>
                 </Grid>
             </Border>
-        </StackPanel>
+        </Grid>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button x:Name="OkButton" Width="90" Margin="0,0,8,0" Click="OnOk"/>

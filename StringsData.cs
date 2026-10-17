@@ -120,6 +120,7 @@ internal static class StringsData
         ["balloon.updateBody"] = "v{0} が利用可能です。クリックでリリースページを開きます。",
         ["btn.openRelease"] = "ダウンロードページを開く",
         ["check.bold"] = "太字",
+        ["label.previewBg"] = "プレビューの背景",
     };
 
     public static readonly System.Collections.Generic.Dictionary<string, string> StringsEn = new()
@@ -236,6 +237,7 @@ internal static class StringsData
         ["balloon.updateBody"] = "v{0} is available. Click to open the release page.",
         ["btn.openRelease"] = "Open download page",
         ["check.bold"] = "Bold",
+        ["label.previewBg"] = "Preview background",
     };
 
     public static readonly System.Collections.Generic.Dictionary<string, string> StringsZhHans = new()
@@ -352,6 +354,7 @@ internal static class StringsData
         ["balloon.updateBody"] = "v{0} 可用。单击打开发布页面。",
         ["btn.openRelease"] = "打开下载页面",
         ["check.bold"] = "粗体",
+        ["label.previewBg"] = "预览背景",
     };
 
     public static readonly System.Collections.Generic.Dictionary<string, string> StringsKo = new()
@@ -468,6 +471,7 @@ internal static class StringsData
         ["balloon.updateBody"] = "v{0} 사용 가능. 클릭하여 릴리스 페이지를 엽니다.",
         ["btn.openRelease"] = "다운로드 페이지 열기",
         ["check.bold"] = "굵게",
+        ["label.previewBg"] = "미리보기 배경",
     };
 
 }

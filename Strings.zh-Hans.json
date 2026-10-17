@@ -110,5 +110,6 @@
   "balloon.updateTitle": "TVClock Modern 新版本",
   "balloon.updateBody": "v{0} 可用。单击打开发布页面。",
   "btn.openRelease": "打开下载页面",
-  "check.bold": "粗体"
+  "check.bold": "粗体",
+  "label.previewBg": "预览背景"
 }

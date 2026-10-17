@@ -110,5 +110,6 @@
   "balloon.updateTitle": "TVClock Modern の新バージョン",
   "balloon.updateBody": "v{0} が利用可能です。クリックでリリースページを開きます。",
   "btn.openRelease": "ダウンロードページを開く",
-  "check.bold": "太字"
+  "check.bold": "太字",
+  "label.previewBg": "プレビューの背景"
 }

@@ -114,6 +114,8 @@ public sealed class ClockSettings
     public string LastUpdateCheck { get; set; } = "";
     /// <summary>検出済みの未対応新バージョンタグ(通知の再起動後維持用)。空=なし</summary>
     public string PendingUpdate { get; set; } = "";
+    /// <summary>設定画面プレビューの背景色(黒い縁取りを見やすくするため既定は中間グレー)</summary>
+    public string PreviewBackground { get; set; } = "#FF808080";
     /// <summary>最後に使った位置プリセット(桁数変化でサイズが変わった時に再整列するのに使う)</summary>
     public string PositionPreset { get; set; } = "";
     /// <summary>マルチモニタ同時表示時のデバイス別位置 [left, top]</summary>
