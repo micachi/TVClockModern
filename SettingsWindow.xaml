@@ -11,6 +11,24 @@
         Background="{StaticResource DialogBackground}"
         Foreground="#FFDDDDDD"
         ShowInTaskbar="True">
+    <Window.Resources>
+        <!-- スライダー横の数値表示: 直接入力できる数値欄 (Enter / フォーカス喪失で確定、Esc で戻す) -->
+        <Style x:Key="ValueBox" TargetType="TextBox">
+            <Setter Property="Width" Value="60"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextAlignment" Value="Right"/>
+            <Setter Property="Padding" Value="3,1"/>
+            <Setter Property="Margin" Value="6,0,0,0"/>
+            <Setter Property="Background" Value="#FF1F1F1F"/>
+            <Setter Property="Foreground" Value="#FFEEEEEE"/>
+            <Setter Property="CaretBrush" Value="#FFEEEEEE"/>
+            <Setter Property="BorderBrush" Value="#FF666666"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <EventSetter Event="LostFocus" Handler="OnValueBoxCommit"/>
+            <EventSetter Event="KeyDown" Handler="OnValueBoxKeyDown"/>
+            <EventSetter Event="GotKeyboardFocus" Handler="OnValueBoxFocus"/>
+        </Style>
+    </Window.Resources>
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -47,7 +65,10 @@
                             <Slider x:Name="TransitionDurationSlider" Grid.Column="2" Minimum="50" Maximum="500" Width="140"
                                     SmallChange="10" LargeChange="100" IsMoveToPointEnabled="False"
                                     ValueChanged="OnPreviewChanged" Margin="0,4,0,10"/>
-                            <TextBlock x:Name="TransitionDurationValue" Grid.Column="3" VerticalAlignment="Center" MinWidth="40" TextAlignment="Right"/>
+                            <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBox x:Name="TransitionDurationValue" Style="{StaticResource ValueBox}"/>
+                                <TextBlock Text="ms" VerticalAlignment="Center" Margin="2,0,0,0" Foreground="#FFBBBBBB"/>
+                            </StackPanel>
                         </Grid>
                     </StackPanel>
                 </ScrollViewer>
@@ -70,7 +91,7 @@
                             <Slider x:Name="SizeSlider" Grid.Column="0" Minimum="12" Maximum="500"
                                     SmallChange="1" LargeChange="20" IsMoveToPointEnabled="False"
                                     Margin="0,4,0,10" ValueChanged="OnPreviewChanged"/>
-                            <TextBlock x:Name="SizeValue" Grid.Column="1" VerticalAlignment="Center" MinWidth="36" TextAlignment="Right"/>
+                            <TextBox x:Name="SizeValue" Style="{StaticResource ValueBox}" Grid.Column="1"/>
                         </Grid>
 
                         <CheckBox x:Name="BoldCheck" Margin="0,0,0,12" Checked="OnPreviewChanged" Unchecked="OnPreviewChanged"/>
@@ -91,7 +112,7 @@
                             <Slider x:Name="LetterSpacingSlider" Grid.Column="0" Minimum="0" Maximum="50"
                                     SmallChange="1" LargeChange="5" IsMoveToPointEnabled="False"
                                     Margin="0,4,0,10" ValueChanged="OnPreviewChanged"/>
-                            <TextBlock x:Name="LetterSpacingValue" Grid.Column="1" VerticalAlignment="Center" MinWidth="36" TextAlignment="Right"/>
+                            <TextBox x:Name="LetterSpacingValue" Style="{StaticResource ValueBox}" Grid.Column="1"/>
                         </Grid>
 
                         <TextBlock x:Name="lblSepSpacing" FontWeight="Bold"/>
@@ -103,7 +124,7 @@
                             <Slider x:Name="SeparatorSpacingSlider" Grid.Column="0" Minimum="0" Maximum="200"
                                     SmallChange="1" LargeChange="10" IsMoveToPointEnabled="False"
                                     Margin="0,4,0,10" ValueChanged="OnPreviewChanged"/>
-                            <TextBlock x:Name="SeparatorSpacingValue" Grid.Column="1" VerticalAlignment="Center" MinWidth="36" TextAlignment="Right"/>
+                            <TextBox x:Name="SeparatorSpacingValue" Style="{StaticResource ValueBox}" Grid.Column="1"/>
                         </Grid>
                     </StackPanel>
                 </ScrollViewer>
@@ -134,7 +155,7 @@
                             <Slider x:Name="OutlineThicknessSlider" Grid.Column="1" Grid.Row="1" Minimum="0.5" Maximum="10"
                                     SmallChange="0.5" LargeChange="1" IsMoveToPointEnabled="False"
                                     ValueChanged="OnPreviewChanged" Margin="0,4,0,10"/>
-                            <TextBlock x:Name="OutlineThicknessValue" Grid.Column="2" Grid.Row="1" Text="2.0" VerticalAlignment="Center" MinWidth="30" TextAlignment="Right"/>
+                            <TextBox x:Name="OutlineThicknessValue" Style="{StaticResource ValueBox}" Grid.Column="2" Grid.Row="1"/>
                         </Grid>
 
                         <TextBlock x:Name="lblShadow" FontWeight="Bold"/>
@@ -152,12 +173,12 @@
                             <Slider x:Name="ShadowBlurSlider" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="40"
                                     SmallChange="1" LargeChange="4" IsMoveToPointEnabled="False"
                                     ValueChanged="OnPreviewChanged" Margin="0,4,0,8"/>
-                            <TextBlock x:Name="ShadowBlurValue" Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" MinWidth="30" TextAlignment="Right"/>
+                            <TextBox x:Name="ShadowBlurValue" Style="{StaticResource ValueBox}" Grid.Row="0" Grid.Column="2"/>
                             <TextBlock x:Name="lblShadowDensity" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center"/>
                             <Slider x:Name="ShadowOpacitySlider" Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="1"
                                     SmallChange="0.01" LargeChange="0.05" IsMoveToPointEnabled="False"
                                     ValueChanged="OnPreviewChanged" Margin="0,4,0,10"/>
-                            <TextBlock x:Name="ShadowOpacityValue" Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" MinWidth="30" TextAlignment="Right"/>
+                            <TextBox x:Name="ShadowOpacityValue" Style="{StaticResource ValueBox}" Grid.Row="1" Grid.Column="2"/>
                         </Grid>
                     </StackPanel>
                 </ScrollViewer>
@@ -193,7 +214,7 @@
                             <Slider x:Name="OpacitySlider" Grid.Column="0" Minimum="0.2" Maximum="1"
                                     SmallChange="0.01" LargeChange="0.05" IsMoveToPointEnabled="False"
                                     Margin="0,4,0,4" ValueChanged="OnPreviewChanged"/>
-                            <TextBlock x:Name="OpacityValue" Grid.Column="1" VerticalAlignment="Center" MinWidth="36" TextAlignment="Right"/>
+                            <TextBox x:Name="OpacityValue" Style="{StaticResource ValueBox}" Grid.Column="1"/>
                         </Grid>
 
                         <CheckBox x:Name="TopmostCheck" Margin="0,8,0,6"/>
@@ -226,17 +247,17 @@
                             <Slider x:Name="ProximitySlider" Grid.Row="0" Grid.Column="1" Minimum="10" Maximum="400"
                                     SmallChange="5" LargeChange="20" IsMoveToPointEnabled="False"
                                     ValueChanged="OnPreviewChanged" Margin="0,4,0,8"/>
-                            <TextBlock x:Name="ProximityValue" Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" MinWidth="36" TextAlignment="Right"/>
+                            <TextBox x:Name="ProximityValue" Style="{StaticResource ValueBox}" Grid.Row="0" Grid.Column="2"/>
                             <TextBlock x:Name="lblProximityOpacity" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center"/>
                             <Slider x:Name="ProximityOpacitySlider" Grid.Row="1" Grid.Column="1" Minimum="0.1" Maximum="1"
                                     SmallChange="0.01" LargeChange="0.05" IsMoveToPointEnabled="False"
                                     ValueChanged="OnPreviewChanged" Margin="0,4,0,8"/>
-                            <TextBlock x:Name="ProximityOpacityValue" Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" MinWidth="36" TextAlignment="Right"/>
+                            <TextBox x:Name="ProximityOpacityValue" Style="{StaticResource ValueBox}" Grid.Row="1" Grid.Column="2"/>
                             <TextBlock x:Name="lblFadeSpeed" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center"/>
                             <Slider x:Name="FadeSpeedSlider" Grid.Row="2" Grid.Column="1" Minimum="1" Maximum="10"
                                     SmallChange="1" LargeChange="1" IsMoveToPointEnabled="False"
                                     ValueChanged="OnPreviewChanged" Margin="0,4,0,10"/>
-                            <TextBlock x:Name="FadeSpeedValue" Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" MinWidth="36" TextAlignment="Right"/>
+                            <TextBox x:Name="FadeSpeedValue" Style="{StaticResource ValueBox}" Grid.Row="2" Grid.Column="2"/>
                         </Grid>
                         <TextBlock x:Name="lblFadeCurve" FontWeight="Bold"/>
                         <ComboBox x:Name="FadeEasingBox" SelectedValuePath="Key" DisplayMemberPath="Value"

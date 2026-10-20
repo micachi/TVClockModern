@@ -396,18 +396,18 @@ public partial class SettingsWindow : Window
         BuildPreviewText(PreviewDateHost, dateStr, family, Math.Max(12, size * 0.35), mainColor, outlineColor, outlineThickness, shadow);
         PreviewDateHost.Visibility = dateStr.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
 
-        // 数値ラベル
-        SizeValue.Text = ((int)SizeSlider.Value).ToString();
-        LetterSpacingValue.Text = LetterSpacingSlider.Value.ToString("0");
-        SeparatorSpacingValue.Text = SeparatorSpacingSlider.Value.ToString("0");
-        TransitionDurationValue.Text = TransitionDurationSlider.Value.ToString("0ms");
-        OpacityValue.Text = OpacitySlider.Value.ToString("0.00");
-        OutlineThicknessValue.Text = OutlineThicknessSlider.Value.ToString("0.0");
-        ShadowBlurValue.Text = ShadowBlurSlider.Value.ToString("0");
-        ShadowOpacityValue.Text = ShadowOpacitySlider.Value.ToString("0.00");
-        ProximityValue.Text = ((int)ProximitySlider.Value).ToString();
-        ProximityOpacityValue.Text = ProximityOpacitySlider.Value.ToString("0.00");
-        FadeSpeedValue.Text = ((int)FadeSpeedSlider.Value).ToString();
+        // 数値欄(スライダーと双方向。入力中の欄は上書きしない)
+        SetValueText(SizeValue, SizeSlider.Value);
+        SetValueText(LetterSpacingValue, LetterSpacingSlider.Value);
+        SetValueText(SeparatorSpacingValue, SeparatorSpacingSlider.Value);
+        SetValueText(TransitionDurationValue, TransitionDurationSlider.Value);
+        SetValueText(OpacityValue, OpacitySlider.Value);
+        SetValueText(OutlineThicknessValue, OutlineThicknessSlider.Value);
+        SetValueText(ShadowBlurValue, ShadowBlurSlider.Value);
+        SetValueText(ShadowOpacityValue, ShadowOpacitySlider.Value);
+        SetValueText(ProximityValue, ProximitySlider.Value);
+        SetValueText(ProximityOpacityValue, ProximityOpacitySlider.Value);
+        SetValueText(FadeSpeedValue, FadeSpeedSlider.Value);
     }
 
     private static Color ParseColor(string hex, Color fallback)
@@ -723,4 +723,70 @@ public partial class SettingsWindow : Window
 
     private void OnPreviewChanged(object sender, RoutedEventArgs e)
         => UpdatePreview();
+
+    // ---------- 数値入力欄 ----------
+    // スライダー横の数値表示を直接入力できる欄にしたもの。
+    // 欄の名前は「<スライダー名>Value」(例: SizeValue ⇔ SizeSlider)で対応付ける。
+
+    private Slider? SliderFor(TextBox box) =>
+        FindName(box.Name.Replace("Value", "Slider")) as Slider;
+
+    private static string FormatValue(string boxName, double value) => boxName switch
+    {
+        "OutlineThicknessValue" => value.ToString("0.0"),
+        "OpacityValue" or "ShadowOpacityValue" or "ProximityOpacityValue" => value.ToString("0.00"),
+        _ => value.ToString("0"),
+    };
+
+    /// <summary>スライダー値を数値欄へ反映する。入力中の欄は書き換えない(毎秒のプレビュー更新で入力を壊さない)。</summary>
+    private static void SetValueText(TextBox? box, double value)
+    {
+        if (box is null || box.IsKeyboardFocused) return;
+        box.Text = FormatValue(box.Name, value);
+    }
+
+    private void OnValueBoxCommit(object sender, RoutedEventArgs e) => CommitValueBox(sender as TextBox);
+
+    private void OnValueBoxFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
+    {
+        if (sender is TextBox box) box.SelectAll();
+    }
+
+    private void OnValueBoxKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (sender is not TextBox box) return;
+        if (e.Key == System.Windows.Input.Key.Enter)
+        {
+            CommitValueBox(box);
+            e.Handled = true;
+        }
+        else if (e.Key == System.Windows.Input.Key.Escape)
+        {
+            if (SliderFor(box) is { } s) box.Text = FormatValue(box.Name, s.Value);
+            box.SelectAll();
+            e.Handled = true;
+        }
+    }
+
+    /// <summary>入力された数値をスライダーへ反映する(範囲外はスライダーの範囲へクランプ、不正な文字列は元の値へ戻す)。</summary>
+    private void CommitValueBox(TextBox? box)
+    {
+        if (box is null || SliderFor(box) is not { } slider) return;
+
+        var text = (box.Text ?? "").Trim();
+        if (double.TryParse(text, System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.CurrentCulture, out var v) ||
+            double.TryParse(text, System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture, out v))
+        {
+            // 整数表示の欄は整数へ丸める(表示と実際の値がずれないように)
+            var isInteger = box.Name is not ("OutlineThicknessValue" or "OpacityValue"
+                or "ShadowOpacityValue" or "ProximityOpacityValue");
+            if (isInteger) v = Math.Round(v, MidpointRounding.AwayFromZero);
+            slider.Value = Math.Clamp(v, slider.Minimum, slider.Maximum);
+        }
+
+        box.Text = FormatValue(box.Name, slider.Value);
+        UpdatePreview();
+    }
 }

@@ -1,4 +1,4 @@
-# TVClock Modern User Manual
+﻿# TVClock Modern User Manual
 
 Covers version 1.4.0
 
@@ -91,6 +91,8 @@ Operations are the same in this case (settings are shared across all clocks).
 ---
 
 ## 4. Settings Reference (Format/Text/Decoration Tabs)
+
+The number to the right of each slider is an input field. Type a value and press Enter to apply it, or Esc to revert (handy for large values such as font size).
 
 ### Time Format
 
