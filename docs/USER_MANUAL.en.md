@@ -1,6 +1,6 @@
 ﻿# TVClock Modern User Manual
 
-Covers version 1.4.0
+Covers version 1.5.0
 
 ---
 

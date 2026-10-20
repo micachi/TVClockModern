@@ -1,4 +1,4 @@
-# TVClock Modern
+﻿# TVClock Modern
 
 📖 User Manual: [English](docs/USER_MANUAL.en.md) / [日本語](docs/USER_MANUAL.md) / [简体中文](docs/USER_MANUAL.zh-Hans.md) / [한국어](docs/USER_MANUAL.ko.md)
 
@@ -21,6 +21,7 @@ Built with .NET 8 / WPF. Single exe, resident, low overhead, and designed to res
 - **Rich display**: font / size / color / outline / shadow / opacity / free-format time & date formats
 - **Per-character rendering**: adjustable character spacing and separator spacing
 - **Bold**: optionally render the time and the date in bold (Text tab)
+- **Direct numeric entry**: each slider's value box accepts typed numbers (Enter to apply / Esc to cancel). Font size can go up to 500
 - **Transition effects**: horizontal flip / vertical flip / slide up / slide down / fade in-out / crossfade
 - **Mouse-proximity fade**: becomes transparent when the mouse approaches. A transparency-release key (Ctrl, etc.) makes it temporarily interactive
 - **Click-through**: interact with what's beneath the clock (you can't get locked out — the tray icon is always accessible)
