@@ -229,7 +229,7 @@ public sealed class ClockSettings
         var validEffects = new[] { "none", "flipx", "flipy", "slideup", "slidedown", "fade", "crossfade" };
         if (!validEffects.Contains(TransitionEffect)) TransitionEffect = "crossfade";
 
-        FontSize = ClampFinite(FontSize, 12, 200, 64);
+        FontSize = ClampFinite(FontSize, 12, 500, 64);
         WindowOpacity = ClampFinite(WindowOpacity, 0.1, 1.0, 1.0);
         ShadowBlur = ClampFinite(ShadowBlur, 0, 60, 6);
         ShadowOpacity = ClampFinite(ShadowOpacity, 0, 1, 0.85);

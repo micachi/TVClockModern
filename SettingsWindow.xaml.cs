@@ -237,7 +237,7 @@ public partial class SettingsWindow : Window
         FontBox.SelectedItem = s.FontFamily;
         if (FontBox.SelectedItem is null) FontBox.Text = s.FontFamily;
 
-        SizeSlider.Value = Math.Clamp(s.FontSize, 12, 200);
+        SizeSlider.Value = Math.Clamp(s.FontSize, 12, 500);
         BoldCheck.IsChecked = s.FontWeight == "bold";
         LetterSpacingSlider.Value = s.LetterSpacing;
         SeparatorSpacingSlider.Value = s.SeparatorSpacing;

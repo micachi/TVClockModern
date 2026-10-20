@@ -113,7 +113,7 @@ See [6. Date and Time Format Specifiers](#6-date-and-time-format-specifiers) for
 
 ### Font / Font Size
 
-Select from fonts installed on the system. Size range is 12–200.
+Select from fonts installed on the system. Size range is 12–500.
 
 ### Bold
 
