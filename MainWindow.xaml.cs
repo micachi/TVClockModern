@@ -25,11 +25,10 @@ public partial class MainWindow : Window
     private const int WM_MOVING = 0x0216;
     private HwndSource? _hwndSource;
 
-    [StructLayout(LayoutKind.Sequential)]
-    private struct MoveRect
-    {
-        public int Left, Top, Right, Bottom;
-    }
+    // --- 自前ドラッグ(OS の移動ループを使わない) ---
+    private bool _dragging;
+    private System.Drawing.Point _dragCursorStartPx;
+    private double _dragLeftStart, _dragTopStart, _dragDpiStart;
 
     // 縁取り用のコピー(本体 + 8方向)
     public MainWindow(string monitorDevice = "")
@@ -713,24 +712,13 @@ public partial class MainWindow : Window
         }
     }
 
-    /// <summary>作業領域(タスクバーを除く)へ収めるための境界を返す。窓が作業領域より大きい次元は左/上端に寄せる。</summary>
-    private static (double MinLeft, double MaxLeft, double MinTop, double MaxTop) GuardBounds(
-        System.Drawing.Rectangle wa, double dpi, double wDip, double hDip)
-    {
-        var wpx = (int)Math.Round(wDip * dpi);
-        var hpx = (int)Math.Round(hDip * dpi);
-        var maxLeft = Math.Max(wa.Left, wa.Right - wpx);
-        var maxTop = Math.Max(wa.Top, wa.Bottom - hpx);
-        return (wa.Left / dpi, maxLeft / dpi, wa.Top / dpi, maxTop / dpi);
-    }
-
-    /// <summary>WM_MOVING: ドラッグ中の移動先矩形を四辺とも作業領域内へ補正する(オフなら素通し)。</summary>
+    /// <summary>WM_MOVING: OS 主導の移動(外部からの移動)でも四辺を作業領域内へ補正する。オフなら素通し。</summary>
     private IntPtr MoveGuardHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
         if (msg != WM_MOVING || !App.Settings.KeepOnScreen) return IntPtr.Zero;
         try
         {
-            var r = Marshal.PtrToStructure<MoveRect>(lParam);
+            var r = Marshal.PtrToStructure<ScreenGuard.MoveRect>(lParam);
             var w = Math.Max(0, r.Right - r.Left);
             var h = Math.Max(0, r.Bottom - r.Top);
             if (w == 0 || h == 0) return IntPtr.Zero;
@@ -739,25 +727,36 @@ public partial class MainWindow : Window
             var center = new System.Drawing.Point(r.Left + w / 2, r.Top + h / 2);
             var wa = System.Windows.Forms.Screen.FromPoint(center).WorkingArea;
 
-            // WM_MOVING は物理px。DIP を経由せず物理pxのまま境界を作る
-            var maxLeft = Math.Max(wa.Left, wa.Right - w);
-            var maxTop = Math.Max(wa.Top, wa.Bottom - h);
-            var nl = Math.Clamp(r.Left, wa.Left, maxLeft);
-            var nt = Math.Clamp(r.Top, wa.Top, maxTop);
-            if (nl == r.Left && nt == r.Top) return IntPtr.Zero;
-
-            r.Right = nl + w;
-            r.Bottom = nt + h;
-            r.Left = nl;
-            r.Top = nt;
-            Marshal.StructureToPtr(r, lParam, false);
-            handled = true;
+            if (ScreenGuard.Constrain(wa, ref r))
+            {
+                Marshal.StructureToPtr(r, lParam, false);
+                handled = true;
+            }
         }
         catch (Exception ex)
         {
             Logger.Error("移動時の画面外クランプに失敗", ex);
         }
         return IntPtr.Zero;
+    }
+
+    /// <summary>
+    /// ドラッグ先の位置を返す。ガード ON なら作業領域内へ収め、OFF なら一切補正しない。
+    /// (自前ドラッグ・クランプ・サイズ変更時クランプの共通経路)
+    /// </summary>
+    private (double Left, double Top) ComputeGuardPosition(double left, double top, double dpi)
+    {
+        if (!App.Settings.KeepOnScreen) return (left, top);   // 完全フリー
+        var wDip = Math.Max(0, ActualWidth);
+        var hDip = Math.Max(0, ActualHeight);
+        if (wDip <= 0 || hDip <= 0) return (left, top);
+
+        // モニタは窓の中心で判定(左上基準だと跨ぎ位置で対象がずれる)
+        var center = new System.Drawing.Point(
+            (int)((left + wDip / 2) * dpi),
+            (int)((top + hDip / 2) * dpi));
+        var wa = System.Windows.Forms.Screen.FromPoint(center).WorkingArea;
+        return ScreenGuard.Clamp(wa, dpi, wDip, hDip, left, top);
     }
 
     /// <summary>ウィンドウの四辺を作業領域内へ収める。「画面外に出さない」がオフなら一切補正しない。</summary>
@@ -768,20 +767,9 @@ public partial class MainWindow : Window
         try
         {
             var dpi = VisualTreeHelper.GetDpi(this).PixelsPerDip;
-            var wDip = Math.Max(0, ActualWidth);
-            var hDip = Math.Max(0, ActualHeight);
-            if (wDip <= 0 || hDip <= 0) return;
+            if (Math.Max(0, ActualWidth) <= 0 || Math.Max(0, ActualHeight) <= 0) return;
 
-            // モニタは窓の中心で判定(左上基準だと跨ぎ位置で対象がずれる)
-            var center = new System.Drawing.Point(
-                (int)((Left + wDip / 2) * dpi),
-                (int)((Top + hDip / 2) * dpi));
-            var wa = System.Windows.Forms.Screen.FromPoint(center).WorkingArea;
-
-            var (minLeft, maxLeft, minTop, maxTop) = GuardBounds(wa, dpi, wDip, hDip);
-            var newLeft = Math.Min(Math.Max(Left, minLeft), maxLeft);
-            var newTop = Math.Min(Math.Max(Top, minTop), maxTop);
-
+            var (newLeft, newTop) = ComputeGuardPosition(Left, Top, dpi);
             if (Math.Abs(newLeft - Left) > 0.5 || Math.Abs(newTop - Top) > 0.5)
             {
                 Left = newLeft;
@@ -1070,26 +1058,94 @@ public partial class MainWindow : Window
                 ShowSettings();
                 return;
             }
-            if (e.ButtonState == MouseButtonState.Pressed)
-            {
-                // 設定画面表示中に時計がクリックされたら、設定画面を1回だけ前面へ
-                if (App.SettingsWindowOpen)
-                    App.BringSettingsToFront();
+            if (e.ButtonState != MouseButtonState.Pressed) return;
 
-                DragMove();
-                // ドラッグ中フックの保険(効かない環境・DPI切替直後)。オフ設定なら何もしない
-                ClampToScreen();
-                // ユーザーの手動移動でプリセットを解除(#6: 再起動後も手動位置を維持)
-                App.Settings.PositionPreset = "";
-                // ドラッグ終了時に即保存(強制終了されても位置が残る)
-                SavePosition();
-                App.Settings.Save();
-            }
+            // 設定画面表示中に時計がクリックされたら、設定画面を1回だけ前面へ
+            if (App.SettingsWindowOpen)
+                App.BringSettingsToFront();
+
+            BeginDrag();
         }
-        catch (InvalidOperationException)
+        catch (Exception ex)
         {
-            // マウスボタン解放後に DragMove が呼ばれた場合の benign 例外
+            Logger.Error("ドラッグ開始に失敗", ex);
         }
+    }
+
+    /// <summary>
+    /// 自前ドラッグの開始。OS のウィンドウ移動ループ(DragMove)は上端を画面内に
+    /// 留めてしまうため、マウスキャプチャ + 位置計算で動かす(ガードOFFなら上下左右すべて自由)。
+    /// </summary>
+    private void BeginDrag()
+    {
+        _dragCursorStartPx = System.Windows.Forms.Cursor.Position;
+        _dragLeftStart = Left;
+        _dragTopStart = Top;
+        _dragDpiStart = VisualTreeHelper.GetDpi(this).PixelsPerDip;
+        _dragging = true;
+
+        Mouse.Capture(this, CaptureMode.SubTree);
+        PreviewMouseMove += OnDragMouseMove;
+        PreviewMouseLeftButtonUp += OnDragMouseUp;
+        LostMouseCapture += OnDragLostCapture;
+    }
+
+    private void OnDragMouseMove(object sender, MouseEventArgs e)
+    {
+        if (!_dragging) return;
+        if (e.LeftButton != MouseButtonState.Pressed)
+        {
+            FinishDrag();
+            return;
+        }
+        try
+        {
+            var dpi = VisualTreeHelper.GetDpi(this).PixelsPerDip;
+            if (Math.Abs(dpi - _dragDpiStart) > 0.01)
+            {
+                // モニタ間で拡大率が変わったら基準を取り直す(座標の飛びを防ぐ)
+                _dragCursorStartPx = System.Windows.Forms.Cursor.Position;
+                _dragLeftStart = Left;
+                _dragTopStart = Top;
+                _dragDpiStart = dpi;
+                return;
+            }
+
+            var p = System.Windows.Forms.Cursor.Position;
+            var dx = (p.X - _dragCursorStartPx.X) / dpi;
+            var dy = (p.Y - _dragCursorStartPx.Y) / dpi;
+            var (nl, nt) = ComputeGuardPosition(_dragLeftStart + dx, _dragTopStart + dy, dpi);
+            Left = nl;
+            Top = nt;
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("ドラッグ中の位置計算に失敗", ex);
+        }
+    }
+
+    private void OnDragMouseUp(object sender, MouseButtonEventArgs e) => FinishDrag();
+
+    private void OnDragLostCapture(object sender, MouseEventArgs e) => FinishDrag();
+
+    /// <summary>ドラッグ終了: 位置を確定して保存する(ガードOFFなら画面外のまま保存)。</summary>
+    private void FinishDrag()
+    {
+        if (!_dragging) return;
+        _dragging = false;
+
+        PreviewMouseMove -= OnDragMouseMove;
+        PreviewMouseLeftButtonUp -= OnDragMouseUp;
+        LostMouseCapture -= OnDragLostCapture;
+        Mouse.Capture(null);
+
+        ClampToScreen(); // ガードON時の保険(オフなら何もしない)
+
+        // ユーザーの手動移動でプリセットを解除(#6: 再起動後も手動位置を維持)
+        App.Settings.PositionPreset = "";
+        // ドラッグ終了時に即保存(強制終了されても位置が残る)
+        SavePosition();
+        App.Settings.Save();
     }
 
     private void OnContextMenuRequest(object sender, MouseButtonEventArgs e)

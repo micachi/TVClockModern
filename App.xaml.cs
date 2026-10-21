@@ -70,6 +70,15 @@ public partial class App : Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        // --- 自己テスト: マウス・キーボード入力を一切使わずにガード計算だけを検証して終了 ---
+        // 時計もトレイも設定も触らない(ユーザー操作を奪わない)。結果は logs/self-test.txt。
+        if (e.Args.Any(a => string.Equals(a, "--self-test", StringComparison.OrdinalIgnoreCase)))
+        {
+            var code = ScreenGuard.RunSelfTest(out _);
+            Shutdown(code);
+            return;
+        }
+
         // --- タスク全体を保護: ここで落としたら時計が消える ---
         DispatcherUnhandledException += (_, args) =>
         {

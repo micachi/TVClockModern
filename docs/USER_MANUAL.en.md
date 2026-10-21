@@ -1,6 +1,6 @@
 ﻿# TVClock Modern User Manual
 
-Covers version 1.6.0
+Covers version 1.6.1
 
 ---
 
@@ -143,7 +143,7 @@ When checked (default), the clock cannot be dragged off the screen: it stays ins
 Turn it off for complete freedom — the clock can be moved off-screen, and positions are not corrected at startup or when the monitor configuration changes either.
 
 - If the clock is larger than the screen (e.g. a large font size), it cannot be made to fit and is aligned to the top-left
-- With the guard on or off, Windows itself keeps the top edge on screen while dragging, so the clock cannot be dragged above the top edge (that limit is not imposed by the app)
+- With the guard off, the clock can be moved completely freely, including above the top edge (dragging is implemented by the app itself, not by the OS move loop)
 - If the clock ends up off-screen with the guard off, open Settings from the tray icon and use a position preset to bring it back
 
 ### When Mouse Approaches
