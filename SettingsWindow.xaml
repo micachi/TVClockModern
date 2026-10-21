@@ -205,6 +205,8 @@
                         <TextBlock x:Name="notePreset"
                                    FontSize="11" Foreground="#FF999999" Margin="0,0,0,12"/>
 
+                        <CheckBox x:Name="KeepOnScreenCheck" Margin="0,0,0,12"/>
+
                         <TextBlock x:Name="lblWindowOpacity" FontWeight="Bold"/>
                         <Grid>
                             <Grid.ColumnDefinitions>

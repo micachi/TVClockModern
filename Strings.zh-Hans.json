@@ -51,6 +51,8 @@
   "check.topmost": "总在最前",
   "check.clickthrough": "点击穿透（可操作时钟下方的内容）",
   "tooltip.clickthrough": "开启后将无法点击时钟。按住透明解除键（Ctrl 等）即可点击或打开右键菜单。也可以从任务栏托盘图标解除。",
+  "check.keepOnScreen": "防止移出屏幕（四边）",
+  "tooltip.keepOnScreen": "开启后，拖动时钟也不会移出屏幕四边。关闭后可自由移动；关闭时启动和显示器配置变化也不会校正位置。",
   "label.modifierKey": "透明解除键",
   "tooltip.modifierKey": "按住期间解除点击穿透并完全显示",
   "modifier.none": "无",

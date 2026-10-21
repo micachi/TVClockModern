@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -20,6 +21,16 @@ public partial class MainWindow : Window
     private DispatcherTimer? _timer;
     private bool _exStyleApplied;
 
+    // --- 画面外ガード(ドラッグ中の四方クランプ) ---
+    private const int WM_MOVING = 0x0216;
+    private HwndSource? _hwndSource;
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MoveRect
+    {
+        public int Left, Top, Right, Bottom;
+    }
+
     // 縁取り用のコピー(本体 + 8方向)
     public MainWindow(string monitorDevice = "")
     {
@@ -41,6 +52,10 @@ public partial class MainWindow : Window
             var ex = NativeMethods.GetWindowLong(hwnd, NativeMethods.GWL_EXSTYLE);
             NativeMethods.SetWindowLong(hwnd, NativeMethods.GWL_EXSTYLE, ex | NativeMethods.WS_EX_TOOLWINDOW);
             _exStyleApplied = true;
+
+            // ドラッグ中も画面外へ出さない(WM_MOVING を補正)。オフなら何もしない。
+            _hwndSource = HwndSource.FromHwnd(hwnd);
+            _hwndSource?.AddHook(MoveGuardHook);
         };
 
         BuildContextMenu();
@@ -54,6 +69,8 @@ public partial class MainWindow : Window
             // タイマーを停止(閉じた窓の監視を続けない)
             _timer?.Stop();
             _proximityTimer?.Stop();
+            _hwndSource?.RemoveHook(MoveGuardHook);
+            _hwndSource = null;
             App.Clocks.Remove(this);
         };
     }
@@ -603,8 +620,13 @@ public partial class MainWindow : Window
             // 起動初期のサイズ決定中は無視、プリセット未使用時も何もしない
             if (!IsLoaded || e.NewSize.Equals(e.PreviousSize)) return;
             var preset = App.Settings.PositionPreset;
-            if (string.IsNullOrWhiteSpace(preset)) return;
-            ApplyPreset(preset); // SavePosition は行うが Settings.Save() はしない(軽量)
+            if (!string.IsNullOrWhiteSpace(preset))
+            {
+                ApplyPreset(preset); // SavePosition は行うが Settings.Save() はしない(軽量)
+                return;
+            }
+            // プリセットなしでも、はみ出さない設定ならサイズ変化後に画面内へ収める
+            if (App.Settings.KeepOnScreen) ClampToScreen();
         }
         catch { }
     }
@@ -691,25 +713,74 @@ public partial class MainWindow : Window
         }
     }
 
-    /// <summary>画面の外に飛んだ位置・切断モニタ上の位置を、作業領域内へ補正する。</summary>
+    /// <summary>作業領域(タスクバーを除く)へ収めるための境界を返す。窓が作業領域より大きい次元は左/上端に寄せる。</summary>
+    private static (double MinLeft, double MaxLeft, double MinTop, double MaxTop) GuardBounds(
+        System.Drawing.Rectangle wa, double dpi, double wDip, double hDip)
+    {
+        var wpx = (int)Math.Round(wDip * dpi);
+        var hpx = (int)Math.Round(hDip * dpi);
+        var maxLeft = Math.Max(wa.Left, wa.Right - wpx);
+        var maxTop = Math.Max(wa.Top, wa.Bottom - hpx);
+        return (wa.Left / dpi, maxLeft / dpi, wa.Top / dpi, maxTop / dpi);
+    }
+
+    /// <summary>WM_MOVING: ドラッグ中の移動先矩形を四辺とも作業領域内へ補正する(オフなら素通し)。</summary>
+    private IntPtr MoveGuardHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        if (msg != WM_MOVING || !App.Settings.KeepOnScreen) return IntPtr.Zero;
+        try
+        {
+            var r = Marshal.PtrToStructure<MoveRect>(lParam);
+            var w = Math.Max(0, r.Right - r.Left);
+            var h = Math.Max(0, r.Bottom - r.Top);
+            if (w == 0 || h == 0) return IntPtr.Zero;
+
+            // モニタは窓の中心で判定(補正しても中心は同じモニタに留まるので振動しない)
+            var center = new System.Drawing.Point(r.Left + w / 2, r.Top + h / 2);
+            var wa = System.Windows.Forms.Screen.FromPoint(center).WorkingArea;
+
+            // WM_MOVING は物理px。DIP を経由せず物理pxのまま境界を作る
+            var maxLeft = Math.Max(wa.Left, wa.Right - w);
+            var maxTop = Math.Max(wa.Top, wa.Bottom - h);
+            var nl = Math.Clamp(r.Left, wa.Left, maxLeft);
+            var nt = Math.Clamp(r.Top, wa.Top, maxTop);
+            if (nl == r.Left && nt == r.Top) return IntPtr.Zero;
+
+            r.Right = nl + w;
+            r.Bottom = nt + h;
+            r.Left = nl;
+            r.Top = nt;
+            Marshal.StructureToPtr(r, lParam, false);
+            handled = true;
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("移動時の画面外クランプに失敗", ex);
+        }
+        return IntPtr.Zero;
+    }
+
+    /// <summary>ウィンドウの四辺を作業領域内へ収める。「画面外に出さない」がオフなら一切補正しない。</summary>
     private void ClampToScreen()
     {
+        // 完全フリー設定: 起動時・適用時・プリセット時・モニタ変更時も含めて何もしない
+        if (!App.Settings.KeepOnScreen) return;
         try
         {
             var dpi = VisualTreeHelper.GetDpi(this).PixelsPerDip;
-            var winPt = new System.Drawing.Point(
-                (int)(Left * dpi), (int)(Top * dpi));
-            var screen = System.Windows.Forms.Screen.FromPoint(winPt);
-            var wa = screen.WorkingArea;
+            var wDip = Math.Max(0, ActualWidth);
+            var hDip = Math.Max(0, ActualHeight);
+            if (wDip <= 0 || hDip <= 0) return;
 
-            var w = Math.Max(0, ActualWidth) * dpi;
-            var h = Math.Max(0, ActualHeight) * dpi;
+            // モニタは窓の中心で判定(左上基準だと跨ぎ位置で対象がずれる)
+            var center = new System.Drawing.Point(
+                (int)((Left + wDip / 2) * dpi),
+                (int)((Top + hDip / 2) * dpi));
+            var wa = System.Windows.Forms.Screen.FromPoint(center).WorkingArea;
 
-            var maxLeft = Math.Max(wa.Left, wa.Right - (int)w);
-            var maxTop = Math.Max(wa.Top, wa.Bottom - (int)h);
-
-            var newLeft = Math.Min(Math.Max(Left, wa.Left / dpi), maxLeft / dpi);
-            var newTop = Math.Min(Math.Max(Top, wa.Top / dpi), maxTop / dpi);
+            var (minLeft, maxLeft, minTop, maxTop) = GuardBounds(wa, dpi, wDip, hDip);
+            var newLeft = Math.Min(Math.Max(Left, minLeft), maxLeft);
+            var newTop = Math.Min(Math.Max(Top, minTop), maxTop);
 
             if (Math.Abs(newLeft - Left) > 0.5 || Math.Abs(newTop - Top) > 0.5)
             {
@@ -1006,6 +1077,8 @@ public partial class MainWindow : Window
                     App.BringSettingsToFront();
 
                 DragMove();
+                // ドラッグ中フックの保険(効かない環境・DPI切替直後)。オフ設定なら何もしない
+                ClampToScreen();
                 // ユーザーの手動移動でプリセットを解除(#6: 再起動後も手動位置を維持)
                 App.Settings.PositionPreset = "";
                 // ドラッグ終了時に即保存(強制終了されても位置が残る)

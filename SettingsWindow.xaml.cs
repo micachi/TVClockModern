@@ -85,6 +85,8 @@ public partial class SettingsWindow : Window
         TopmostCheck.Content = L.T("check.topmost");
         ClickThroughCheck.Content = L.T("check.clickthrough");
         ClickThroughCheck.ToolTip = L.T("tooltip.clickthrough");
+        KeepOnScreenCheck.Content = L.T("check.keepOnScreen");
+        KeepOnScreenCheck.ToolTip = L.T("tooltip.keepOnScreen");
         lblModifierKey.Text = L.T("label.modifierKey");
         lblModifierKey.ToolTip = L.T("tooltip.modifierKey");
         AutoStartCheck.Content = L.T("check.autostart");
@@ -262,6 +264,7 @@ public partial class SettingsWindow : Window
         ShowDateCheck.IsChecked = s.ShowDate;
         TopmostCheck.IsChecked = s.Topmost;
         ClickThroughCheck.IsChecked = s.ClickThrough;
+        KeepOnScreenCheck.IsChecked = s.KeepOnScreen;
         ModifierBox.ItemsSource = new List<KeyValuePair<string, string>>
         {
             new("Ctrl", "Ctrl"),
@@ -575,6 +578,7 @@ public partial class SettingsWindow : Window
         s.ShowDate = ShowDateCheck.IsChecked == true;
         s.Topmost = TopmostCheck.IsChecked == true;
         s.ClickThrough = ClickThroughCheck.IsChecked == true;
+        s.KeepOnScreen = KeepOnScreenCheck.IsChecked == true;
         s.ModifierKey = ModifierBox.SelectedValue as string ?? "Ctrl";
         s.TargetMonitor = (MonitorBox.SelectedItem as MonitorItem)?.Device ?? "";
         s.ShowOnAllMonitors = AllMonitorsCheck.IsChecked == true;

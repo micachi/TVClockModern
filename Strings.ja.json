@@ -51,6 +51,8 @@
   "check.topmost": "常に手前に表示",
   "check.clickthrough": "クリックスルー (時計の下を操作可能にする)",
   "tooltip.clickthrough": "オンにすると時計をクリックできなくなります。透明解除キー(Ctrl等)を押しながらならクリック・右クリックメニューも使えます。タスクトレイアイコンからも解除できます。",
+  "check.keepOnScreen": "画面外に出さない (四方)",
+  "tooltip.keepOnScreen": "オンにすると、時計をドラッグしても画面の外へ出ません(四方とも)。オフにすると自由に動かせます。オフでは起動時やモニタ構成変更時にも位置を補正しません。",
   "label.modifierKey": "透明解除キー",
   "tooltip.modifierKey": "押している間、クリックスルーを解除して完全表示します",
   "modifier.none": "なし",

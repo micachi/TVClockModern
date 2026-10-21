@@ -99,6 +99,8 @@ public sealed class ClockSettings
     // --- 動作 ---
     public bool Topmost { get; set; } = true;
     public bool ClickThrough { get; set; } = false;
+    /// <summary>画面外への移動を防ぐ(四方クランプ)。false なら一切クランプしない(完全フリー)</summary>
+    public bool KeepOnScreen { get; set; } = true;
     public bool AutoStart { get; set; } = false;
     public string TargetMonitor { get; set; } = ""; // ""=自動 / Screen.DeviceName
     /// <summary>クリックスルー中の透明解除キー: Ctrl/Alt/Shift/None</summary>

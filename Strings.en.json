@@ -51,6 +51,8 @@
   "check.topmost": "Always on top",
   "check.clickthrough": "Click-through (interact with what is behind the clock)",
   "tooltip.clickthrough": "When on, the clock cannot be clicked. Hold the transparency key (Ctrl etc.) to click it or open its menu. You can also toggle it from the tray icon.",
+  "check.keepOnScreen": "Keep the clock on screen (all edges)",
+  "tooltip.keepOnScreen": "When on, the clock cannot be dragged off any edge of the screen. When off, it can be moved anywhere — positions are also not corrected at startup or when the monitor configuration changes.",
   "label.modifierKey": "Transparency key",
   "tooltip.modifierKey": "While held, click-through is disabled and the clock is fully visible",
   "modifier.none": "None",

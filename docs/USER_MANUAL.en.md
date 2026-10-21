@@ -1,6 +1,6 @@
 ﻿# TVClock Modern User Manual
 
-Covers version 1.5.0
+Covers version 1.6.0
 
 ---
 
@@ -136,6 +136,15 @@ Selects the user interface language (menus and settings window): 日本語 / Eng
 The default, "Auto (follow system)", follows the Windows display language.
 Changes apply to all windows immediately. Date and weekday names follow the Windows regional format.
 
+
+### Keep the clock on screen (all-edge guard)
+
+When checked (default), the clock cannot be dragged off the screen: it stays inside the work area (taskbar excluded) on all four edges.
+Turn it off for complete freedom — the clock can be moved off-screen, and positions are not corrected at startup or when the monitor configuration changes either.
+
+- If the clock is larger than the screen (e.g. a large font size), it cannot be made to fit and is aligned to the top-left
+- With the guard on or off, Windows itself keeps the top edge on screen while dragging, so the clock cannot be dragged above the top edge (that limit is not imposed by the app)
+- If the clock ends up off-screen with the guard off, open Settings from the tray icon and use a position preset to bring it back
 
 ### When Mouse Approaches
 
