@@ -1,6 +1,6 @@
 ﻿# TVClock Modern User Manual
 
-Covers version 1.6.1
+Covers version 2.0.0
 
 ---
 
@@ -93,6 +93,16 @@ Operations are the same in this case (settings are shared across all clocks).
 ## 4. Settings Reference (Format/Text/Decoration Tabs)
 
 The number to the right of each slider is an input field. Type a value and press Enter to apply it, or Esc to revert (handy for large values such as font size).
+
+### Display mode (Classic / Modern)
+
+- **Classic**: shows the time as digits, as before
+- **Modern**: hides the seconds as digits and conveys them "somehow" through colour changes. Two themes:
+  - **Sweep (double circle)**: a two-colour circle. A dark wedge spreads from 0s and completes the circle at 59s. At the minute boundary the dark colour fades out briefly and the cycle repeats seamlessly
+  - **Liquid (rising level)**: no background. Only the time text fills up from dark to bright like a rising liquid level (0s = dark / 59s = bright)
+- Format (hour/minute), date, font and bold still apply in modern mode. Seconds specifiers are ignored
+- Text colour, outline, shadow and transition effects are not used in modern mode (each theme has a fixed palette)
+- The font size controls the circle size (Sweep) or the text size (Liquid)
 
 ### Time Format
 

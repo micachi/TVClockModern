@@ -110,6 +110,10 @@ public sealed class ClockSettings
     public string Language { get; set; } = "auto";
     /// <summary>文字の太さ: normal / semibold / bold / extrabold</summary>
     public string FontWeight { get; set; } = "normal";
+    /// <summary>表示モード: classic(数字そのまま) / modern(秒を色の変化で表す円形表示)</summary>
+    public string DisplayMode { get; set; } = "classic";
+    /// <summary>モダンテーマ: sweep(二重円の扇形) / liquid(液面)</summary>
+    public string ModernTheme { get; set; } = "sweep";
     /// <summary>起動時に更新を確認する</summary>
     public bool CheckUpdates { get; set; } = true;
     /// <summary>最終更新確認時刻 (UTC, ISO 8601)。空または不正値=未確認</summary>
@@ -228,6 +232,10 @@ public sealed class ClockSettings
         if (!validLanguages.Contains(Language)) Language = "auto";
         var validWeights = new[] { "normal", "semibold", "bold", "extrabold" };
         if (!validWeights.Contains(FontWeight)) FontWeight = "normal";
+        var validModes = new[] { "classic", "modern" };
+        if (!validModes.Contains(DisplayMode)) DisplayMode = "classic";
+        var validThemes = new[] { "sweep", "liquid" };
+        if (!validThemes.Contains(ModernTheme)) ModernTheme = "sweep";
         var validEffects = new[] { "none", "flipx", "flipy", "slideup", "slidedown", "fade", "crossfade" };
         if (!validEffects.Contains(TransitionEffect)) TransitionEffect = "crossfade";
 

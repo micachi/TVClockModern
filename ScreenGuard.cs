@@ -139,13 +139,29 @@ internal static class ScreenGuard
         var changed4 = Constrain(waMain, ref r4);
         Check("constrain: zero-size rect ignored", !changed4);
 
+        // --- モダン表示の進行度(秒を数字で出さないための計算) ---
+        var t0 = new DateTime(2026, 1, 1, 8, 30, 0);
+        Check("modern: fraction 0s = 0", Near(ModernClockMath.Fraction(t0), 0.0),
+            $"{ModernClockMath.Fraction(t0):0.####}");
+        Check("modern: fraction 30s = 0.5", Near(ModernClockMath.Fraction(t0.AddSeconds(30)), 0.5),
+            $"{ModernClockMath.Fraction(t0.AddSeconds(30)):0.####}");
+        Check("modern: fraction 59.5s = 59.5/60",
+            Near(ModernClockMath.Fraction(t0.AddSeconds(59).AddMilliseconds(500)), 59.5 / 60.0),
+            $"{ModernClockMath.Fraction(t0.AddSeconds(59).AddMilliseconds(500)):0.####}");
+        Check("modern: rollover full at minute start", Near(ModernClockMath.Rollover(0, 0.7), 1.0));
+        Check("modern: rollover half way", Near(ModernClockMath.Rollover(0.35, 0.7), 0.5));
+        Check("modern: rollover gone after duration", Near(ModernClockMath.Rollover(0.7, 0.7), 0.0));
+        Check("modern: liquid starts full", Near(ModernClockMath.LiquidLevel(0, 1), 1.0));
+        Check("modern: liquid follows fraction", Near(ModernClockMath.LiquidLevel(0.5, 0), 0.5));
+        Check("modern: liquid clamps to 1", Near(ModernClockMath.LiquidLevel(1.2, 0), 1.0));
+
         // --- レポート ---
         var dir = System.IO.Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "TVClockModern", "logs");
         System.IO.Directory.CreateDirectory(dir);
         reportPath = System.IO.Path.Combine(dir, "self-test.txt");
-        var header = $"ScreenGuard self-test  {DateTime.Now:yyyy-MM-dd HH:mm:ss}  "
+        var header = $"TVClockModern self-test  {DateTime.Now:yyyy-MM-dd HH:mm:ss}  "
                    + $"{lines.Count - failures}/{lines.Count} passed";
         var body = header + Environment.NewLine + string.Join(Environment.NewLine, lines) + Environment.NewLine;
         try { System.IO.File.WriteAllText(reportPath, body); } catch { }

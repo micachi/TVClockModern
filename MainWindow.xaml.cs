@@ -19,6 +19,8 @@ public partial class MainWindow : Window
     private readonly ContextMenu ClockMenu = new();
 
     private DispatcherTimer? _timer;
+    private DispatcherTimer? _modernTimer;      // モダンモードの進行度更新(50ms)
+    private ModernClockView? _modernView;
     private bool _exStyleApplied;
 
     // --- 画面外ガード(ドラッグ中の四方クランプ) ---
@@ -68,6 +70,7 @@ public partial class MainWindow : Window
             // タイマーを停止(閉じた窓の監視を続けない)
             _timer?.Stop();
             _proximityTimer?.Stop();
+            StopModernTimer();
             _hwndSource?.RemoveHook(MoveGuardHook);
             _hwndSource = null;
             App.Clocks.Remove(this);
@@ -110,9 +113,96 @@ public partial class MainWindow : Window
         _timeLayers.Host = TimeHost;
         _dateLayers.Host = DateHost;
 
+        // モダンモード: 円形の専用ビューへ切り替える(日付は円の中に描く)
+        if (IsModernMode)
+        {
+            BuildModernVisuals(s);
+            return;
+        }
+
+        // クラシックモードへ戻す
+        StopModernTimer();
+        _modernView = null;
+        DateHost.Visibility = Visibility.Visible;
+
         var weight = StrokeText.ParseWeight(s.FontWeight);
         RebuildLayers(_timeLayers, family, s.FontSize, textColor, outlineColor, weight);
         RebuildLayers(_dateLayers, family, Math.Max(12, s.FontSize * 0.35), textColor, outlineColor, weight);
+    }
+
+    private static bool IsModernMode =>
+        string.Equals(App.Settings.DisplayMode, "modern", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>モダンモードの円形表示を構築する(クラシックの文字レイヤーは使わない)。</summary>
+    private void BuildModernVisuals(ClockSettings s)
+    {
+        StopModernTimer();
+        _timeLayers.Host.Children.Clear();
+        _dateLayers.Host.Children.Clear();
+        _timeLayers.Layers.Clear();
+        _timeLayers.LastText = "";
+        _dateLayers.Layers.Clear();
+        _dateLayers.LastText = "";
+
+        // 日付は円の中に描くので、クラシック用の日付ホストは隠す
+        _dateLayers.Host.Visibility = Visibility.Collapsed;
+
+        _modernView = new ModernClockView
+        {
+            Theme = s.ModernTheme,
+            FontFamily = new FontFamily(string.IsNullOrWhiteSpace(s.FontFamily) ? "Yu Gothic UI" : s.FontFamily),
+            Weight = StrokeText.ParseWeight(s.FontWeight),
+            TextSize = Math.Max(12, s.FontSize),
+        };
+        _timeLayers.Host.Children.Add(_modernView);
+
+        StartModernTimer();
+        UpdateModern(DateTime.Now);
+    }
+
+    private void StartModernTimer()
+    {
+        StopModernTimer();
+        _modernTimer = new DispatcherTimer(DispatcherPriority.Render)
+        {
+            Interval = TimeSpan.FromMilliseconds(50), // 扇形・液面を滑らかに動かす
+        };
+        _modernTimer.Tick += (_, _) => UpdateModern(DateTime.Now);
+        _modernTimer.Start();
+    }
+
+    private void StopModernTimer()
+    {
+        _modernTimer?.Stop();
+        _modernTimer = null;
+    }
+
+    /// <summary>モダン表示の文字と進行度を更新する(秒は数字にしない)。</summary>
+    private void UpdateModern(DateTime now)
+    {
+        var v = _modernView;
+        if (v is null) return;
+        try
+        {
+            var s = App.Settings;
+
+            // 秒の指定子が含まれていたら時:分へ落とす(秒は色の変化で表す)
+            var fmt = s.TimeFormat ?? "HH:mm";
+            if (fmt.IndexOf('s') >= 0 || fmt.IndexOf('S') >= 0) fmt = "HH:mm";
+            v.TimeText = SafeTimeText(now, fmt, v.TimeText);
+            v.DateText = string.IsNullOrWhiteSpace(s.DateFormat) || !s.ShowDate
+                ? ""
+                : SafeTimeText(now, s.DateFormat, v.DateText);
+
+            v.Fraction = ModernClockMath.Fraction(now);
+            var secondsIn = now.Second + now.Millisecond / 1000.0;
+            v.Rollover = ModernClockMath.Rollover(secondsIn,
+                string.Equals(s.ModernTheme, "liquid", StringComparison.OrdinalIgnoreCase) ? 0.45 : 0.7);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("モダン表示の更新に失敗", ex);
+        }
     }
 
     private static Color ParseColor(string hex, Color fallback)
@@ -462,13 +552,20 @@ public partial class MainWindow : Window
             var now = DateTime.Now;
 
             var s = App.Settings;
-            SetText(_timeLayers, SafeTimeText(now, s.TimeFormat, _timeLayers.LastText), Visibility.Visible);
+            if (IsModernMode)
+            {
+                UpdateModern(now);
+            }
+            else
+            {
+                SetText(_timeLayers, SafeTimeText(now, s.TimeFormat, _timeLayers.LastText), Visibility.Visible);
 
-            var dateText = string.IsNullOrWhiteSpace(s.DateFormat) || !s.ShowDate
-                ? ""
-                : SafeTimeText(now, s.DateFormat, _dateLayers.LastText);
-            SetText(_dateLayers, dateText,
-                dateText.Length == 0 ? Visibility.Collapsed : Visibility.Visible);
+                var dateText = string.IsNullOrWhiteSpace(s.DateFormat) || !s.ShowDate
+                    ? ""
+                    : SafeTimeText(now, s.DateFormat, _dateLayers.LastText);
+                SetText(_dateLayers, dateText,
+                    dateText.Length == 0 ? Visibility.Collapsed : Visibility.Visible);
+            }
 
             // 位置の自動保存は1分ごと(ディスクにも書くのでクラッシュ耐性あり)
             if (now.Second == 0)

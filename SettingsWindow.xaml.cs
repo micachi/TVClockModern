@@ -48,6 +48,8 @@ public partial class SettingsWindow : Window
         InfoTab.Header = L.T("tab.info");
 
         lblTimeFormat.Text = L.T("label.timeFormat");
+        lblDisplayMode.Text = L.T("label.displayMode");
+        lblModernTheme.Text = L.T("label.modernTheme");
         lblDateFormat.Text = L.T("label.dateFormat");
         ShowDateCheck.Content = L.T("check.showDate");
         lblTransitionEffect.Text = L.T("label.transitionEffect");
@@ -243,6 +245,19 @@ public partial class SettingsWindow : Window
         BoldCheck.IsChecked = s.FontWeight == "bold";
         LetterSpacingSlider.Value = s.LetterSpacing;
         SeparatorSpacingSlider.Value = s.SeparatorSpacing;
+        ModeBox.ItemsSource = new List<KeyValuePair<string, string>>
+        {
+            new("classic", L.T("mode.classic")),
+            new("modern", L.T("mode.modern")),
+        };
+        ModeBox.SelectedValue = s.DisplayMode;
+        ThemeBox.ItemsSource = new List<KeyValuePair<string, string>>
+        {
+            new("sweep", L.T("theme.sweep")),
+            new("liquid", L.T("theme.liquid")),
+        };
+        ThemeBox.SelectedValue = s.ModernTheme;
+
         TransitionBox.ItemsSource = new List<KeyValuePair<string, string>>
         {
             new("none", L.T("effect.none")),
@@ -395,9 +410,33 @@ public partial class SettingsWindow : Window
         var df = DateFormatBox.Text ?? "";
         var dateStr = string.IsNullOrWhiteSpace(df) || ShowDateCheck.IsChecked != true ? "" : SafeFormat(now, df, "yyyy/MM/dd (ddd)");
 
-        BuildPreviewText(PreviewTimeHost, timeStr, family, size, mainColor, outlineColor, outlineThickness, shadow);
-        BuildPreviewText(PreviewDateHost, dateStr, family, Math.Max(12, size * 0.35), mainColor, outlineColor, outlineThickness, shadow);
-        PreviewDateHost.Visibility = dateStr.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
+        // モダンモード: 円形の専用ビューでプレビューする
+        if (string.Equals(ModeBox.SelectedValue as string, "modern", StringComparison.OrdinalIgnoreCase))
+        {
+            var theme = ThemeBox.SelectedValue as string ?? "sweep";
+            PreviewTimeHost.Children.Clear();
+            PreviewDateHost.Visibility = Visibility.Collapsed;
+
+            var modernFmt = (TimeFormatBox.Text ?? "").IndexOf('s') >= 0 ? "HH:mm" : (TimeFormatBox.Text ?? "HH:mm");
+            PreviewTimeHost.Children.Add(new ModernClockView
+            {
+                Theme = theme,
+                FontFamily = family,
+                Weight = BoldCheck.IsChecked == true ? FontWeights.Bold : FontWeights.Normal,
+                TextSize = size,
+                TimeText = SafeFormat(now, modernFmt, "HH:mm"),
+                DateText = dateStr,
+                Fraction = ModernClockMath.Fraction(now),
+                Rollover = ModernClockMath.Rollover(now.Second + now.Millisecond / 1000.0,
+                    string.Equals(theme, "liquid", StringComparison.OrdinalIgnoreCase) ? 0.45 : 0.7),
+            });
+        }
+        else
+        {
+            BuildPreviewText(PreviewTimeHost, timeStr, family, size, mainColor, outlineColor, outlineThickness, shadow);
+            BuildPreviewText(PreviewDateHost, dateStr, family, Math.Max(12, size * 0.35), mainColor, outlineColor, outlineThickness, shadow);
+            PreviewDateHost.Visibility = dateStr.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
+        }
 
         // 数値欄(スライダーと双方向。入力中の欄は上書きしない)
         SetValueText(SizeValue, SizeSlider.Value);
@@ -567,6 +606,8 @@ public partial class SettingsWindow : Window
         s.LetterSpacing = LetterSpacingSlider.Value;
         s.SeparatorSpacing = SeparatorSpacingSlider.Value;
         s.TransitionEffect = TransitionBox.SelectedValue as string ?? "crossfade";
+        s.DisplayMode = ModeBox.SelectedValue as string ?? "classic";
+        s.ModernTheme = ThemeBox.SelectedValue as string ?? "sweep";
         s.TransitionDurationMs = (int)TransitionDurationSlider.Value;
         s.WindowOpacity = OpacitySlider.Value;
         s.TextShadow = ShadowCheck.IsChecked == true;

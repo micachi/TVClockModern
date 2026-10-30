@@ -43,6 +43,14 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="12,12,12,8">
 
+                        <TextBlock x:Name="lblDisplayMode" FontWeight="Bold"/>
+                        <ComboBox x:Name="ModeBox" Margin="0,4,0,10" SelectedValuePath="Key" DisplayMemberPath="Value"
+                                  SelectionChanged="OnPreviewChanged"/>
+
+                        <TextBlock x:Name="lblModernTheme" FontWeight="Bold"/>
+                        <ComboBox x:Name="ThemeBox" Margin="0,4,0,10" SelectedValuePath="Key" DisplayMemberPath="Value"
+                                  SelectionChanged="OnPreviewChanged"/>
+
                         <TextBlock x:Name="lblTimeFormat" FontWeight="Bold"/>
                         <ComboBox x:Name="TimeFormatBox" IsEditable="True" Margin="0,4,0,10" SelectionChanged="OnPreviewChanged"/>
 
