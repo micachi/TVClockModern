@@ -45,14 +45,14 @@
 
                         <TextBlock x:Name="lblDisplayMode" FontWeight="Bold"/>
                         <ComboBox x:Name="ModeBox" Margin="0,4,0,10" SelectedValuePath="Key" DisplayMemberPath="Value"
-                                  SelectionChanged="OnPreviewChanged"/>
+                                  SelectionChanged="OnModeChanged"/>
 
                         <TextBlock x:Name="lblModernTheme" FontWeight="Bold"/>
                         <ComboBox x:Name="ThemeBox" Margin="0,4,0,10" SelectedValuePath="Key" DisplayMemberPath="Value"
                                   SelectionChanged="OnPreviewChanged"/>
 
                         <TextBlock x:Name="lblSweepColors" FontWeight="Bold"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,4,0,10">
+                        <StackPanel x:Name="SweepColorRow" Orientation="Horizontal" Margin="0,4,0,10">
                             <Button x:Name="SweepDarkButton" Width="80" Click="OnPickSweepDark"/>
                             <Rectangle x:Name="SweepDarkPreview" Width="40" Height="18" Margin="8,0,0,0" RadiusX="3" RadiusY="3" Stroke="#FF888888"/>
                             <Button x:Name="SweepLightButton" Width="80" Margin="12,0,0,0" Click="OnPickSweepLight"/>
@@ -60,7 +60,7 @@
                         </StackPanel>
 
                         <TextBlock x:Name="lblLiquidColors" FontWeight="Bold"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,4,0,10">
+                        <StackPanel x:Name="LiquidColorRow" Orientation="Horizontal" Margin="0,4,0,10">
                             <Button x:Name="LiquidDarkButton" Width="80" Click="OnPickLiquidDark"/>
                             <Rectangle x:Name="LiquidDarkPreview" Width="40" Height="18" Margin="8,0,0,0" RadiusX="3" RadiusY="3" Stroke="#FF888888"/>
                             <Button x:Name="LiquidBrightButton" Width="80" Margin="12,0,0,0" Click="OnPickLiquidBright"/>

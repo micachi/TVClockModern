@@ -103,6 +103,7 @@ The number to the right of each slider is an input field. Type a value and press
 - Format (hour/minute), date, font and bold still apply in modern mode. Seconds specifiers are ignored
 - Text colour, outline, shadow and transition effects are not used in modern mode (each theme has its own palette)
 - Theme colours are selectable: Sweep (dark / light) and Liquid (dark / bright)
+- The theme and colour settings are shown only while modern mode is selected
 - The font size controls the circle size (Sweep) or the text size (Liquid)
 
 ### Time Format

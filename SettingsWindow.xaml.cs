@@ -263,6 +263,7 @@ public partial class SettingsWindow : Window
             new("liquid", L.T("theme.liquid")),
         };
         ThemeBox.SelectedValue = s.ModernTheme;
+        UpdateModernVisibility();
 
         TransitionBox.ItemsSource = new List<KeyValuePair<string, string>>
         {
@@ -799,6 +800,27 @@ public partial class SettingsWindow : Window
 
     private void OnPreviewChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         => UpdatePreview();
+
+    /// <summary>表示モードが変わったとき: モダン専用の設定の表示/非表示を切り替える。</summary>
+    private void OnModeChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    {
+        UpdateModernVisibility();
+        UpdatePreview();
+    }
+
+    /// <summary>モダン専用の設定(テーマ・色)は、クラシック選択時には隠す。</summary>
+    private void UpdateModernVisibility()
+    {
+        var modern = string.Equals(ModeBox.SelectedValue as string, "modern", StringComparison.OrdinalIgnoreCase);
+        var v = modern ? Visibility.Visible : Visibility.Collapsed;
+
+        lblModernTheme.Visibility = v;
+        ThemeBox.Visibility = v;
+        lblSweepColors.Visibility = v;
+        SweepColorRow.Visibility = v;
+        lblLiquidColors.Visibility = v;
+        LiquidColorRow.Visibility = v;
+    }
 
     private void OnPreviewChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         => UpdatePreview();
