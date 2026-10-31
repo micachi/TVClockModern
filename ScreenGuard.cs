@@ -155,6 +155,18 @@ internal static class ScreenGuard
         Check("modern: liquid follows fraction", Near(ModernClockMath.LiquidLevel(0.5, 0), 0.5));
         Check("modern: liquid clamps to 1", Near(ModernClockMath.LiquidLevel(1.2, 0), 1.0));
 
+        // --- リキッド: 分の文字だけを変化させるための分割 ---
+        var (pf1, mf1, sf1) = ModernClockMath.SplitMinuteFormat("h:mm");
+        Check("modern: split format h:mm", pf1 == "h:" && mf1 == "mm" && sf1 == "", $"{pf1}|{mf1}|{sf1}");
+        var (pf2, mf2, sf2) = ModernClockMath.SplitMinuteFormat("H時m分");
+        Check("modern: split format H時m分", pf2 == "H時" && mf2 == "m" && sf2 == "分", $"{pf2}|{mf2}|{sf2}");
+        var (pf3, mf3, sf3) = ModernClockMath.SplitMinuteFormat("HH");
+        Check("modern: split format without minute", pf3 == "HH" && mf3 == "" && sf3 == "", $"{pf3}|{mf3}|{sf3}");
+        var (p4, m4, s4) = ModernClockMath.SplitMinute(new DateTime(2026, 1, 1, 8, 30, 0), "h:mm");
+        Check("modern: split 8:30 h:mm", p4 == "8:" && m4 == "30" && s4 == "", $"{p4}|{m4}|{s4}");
+        var (p5, m5, s5) = ModernClockMath.SplitMinute(new DateTime(2026, 1, 1, 8, 5, 0), "H時m分");
+        Check("modern: split 8:05 H時m分", p5 == "8時" && m5 == "5" && s5 == "分", $"{p5}|{m5}|{s5}");
+
         // --- レポート ---
         var dir = System.IO.Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),

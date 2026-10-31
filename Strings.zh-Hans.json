@@ -26,6 +26,8 @@
   "label.timeFormat": "时间格式",
   "label.displayMode": "显示模式",
   "label.modernTheme": "现代主题",
+  "label.sweepColors": "扫描颜色（深色 / 浅色）",
+  "label.liquidColors": "液体颜色（暗色 / 亮色）",
   "mode.classic": "经典（数字显示）",
   "mode.modern": "现代（用颜色变化表示秒）",
   "theme.sweep": "扫描（双圆）",

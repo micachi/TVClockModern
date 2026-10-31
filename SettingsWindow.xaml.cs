@@ -50,6 +50,12 @@ public partial class SettingsWindow : Window
         lblTimeFormat.Text = L.T("label.timeFormat");
         lblDisplayMode.Text = L.T("label.displayMode");
         lblModernTheme.Text = L.T("label.modernTheme");
+        lblSweepColors.Text = L.T("label.sweepColors");
+        lblLiquidColors.Text = L.T("label.liquidColors");
+        SweepDarkButton.Content = L.T("btn.pick");
+        SweepLightButton.Content = L.T("btn.pick");
+        LiquidDarkButton.Content = L.T("btn.pick");
+        LiquidBrightButton.Content = L.T("btn.pick");
         lblDateFormat.Text = L.T("label.dateFormat");
         ShowDateCheck.Content = L.T("check.showDate");
         lblTransitionEffect.Text = L.T("label.transitionEffect");
@@ -319,6 +325,10 @@ public partial class SettingsWindow : Window
         UpdateColorPreview(ColorPreview, s.TextColor);
         UpdateColorPreview(OutlineColorPreview, s.OutlineColor);
         UpdateColorPreview(PreviewBgPreview, s.PreviewBackground);
+        UpdateColorPreview(SweepDarkPreview, s.ModernSweepDark);
+        UpdateColorPreview(SweepLightPreview, s.ModernSweepLight);
+        UpdateColorPreview(LiquidDarkPreview, s.ModernLiquidDark);
+        UpdateColorPreview(LiquidBrightPreview, s.ModernLiquidBright);
         UpdatePreviewBackground(s.PreviewBackground);
         UpdatePreview();
     }
@@ -329,6 +339,21 @@ public partial class SettingsWindow : Window
         if (PickColor(App.Settings.TextColor) is { } hex)
         {
             UpdateColorPreview(ColorPreview, hex);
+            UpdatePreview();
+        }
+    }
+
+    // ---------- モダンテーマの色 ----------
+    private void OnPickSweepDark(object sender, RoutedEventArgs e) => PickInto(SweepDarkPreview);
+    private void OnPickSweepLight(object sender, RoutedEventArgs e) => PickInto(SweepLightPreview);
+    private void OnPickLiquidDark(object sender, RoutedEventArgs e) => PickInto(LiquidDarkPreview);
+    private void OnPickLiquidBright(object sender, RoutedEventArgs e) => PickInto(LiquidBrightPreview);
+
+    private void PickInto(Rectangle swatch)
+    {
+        if (PickColor(CurrentColorHex(swatch)) is { } hex)
+        {
+            UpdateColorPreview(swatch, hex);
             UpdatePreview();
         }
     }
@@ -418,6 +443,7 @@ public partial class SettingsWindow : Window
             PreviewDateHost.Visibility = Visibility.Collapsed;
 
             var modernFmt = (TimeFormatBox.Text ?? "").IndexOf('s') >= 0 ? "HH:mm" : (TimeFormatBox.Text ?? "HH:mm");
+            var (pfx, min, sfx) = ModernClockMath.SplitMinute(now, modernFmt);
             PreviewTimeHost.Children.Add(new ModernClockView
             {
                 Theme = theme,
@@ -425,7 +451,14 @@ public partial class SettingsWindow : Window
                 Weight = BoldCheck.IsChecked == true ? FontWeights.Bold : FontWeights.Normal,
                 TextSize = size,
                 TimeText = SafeFormat(now, modernFmt, "HH:mm"),
+                TimePrefix = pfx,
+                TimeMinute = min,
+                TimeSuffix = sfx,
                 DateText = dateStr,
+                SweepDarkColor = CurrentColorHex(SweepDarkPreview),
+                SweepLightColor = CurrentColorHex(SweepLightPreview),
+                LiquidDarkColor = CurrentColorHex(LiquidDarkPreview),
+                LiquidBrightColor = CurrentColorHex(LiquidBrightPreview),
                 Fraction = ModernClockMath.Fraction(now),
                 Rollover = ModernClockMath.Rollover(now.Second + now.Millisecond / 1000.0,
                     string.Equals(theme, "liquid", StringComparison.OrdinalIgnoreCase) ? 0.45 : 0.7),
@@ -615,6 +648,10 @@ public partial class SettingsWindow : Window
         s.ShadowOpacity = ShadowOpacitySlider.Value;
         s.OutlineEnabled = OutlineCheck.IsChecked == true;
         s.OutlineColor = CurrentColorHex(OutlineColorPreview);
+        s.ModernSweepDark = CurrentColorHex(SweepDarkPreview);
+        s.ModernSweepLight = CurrentColorHex(SweepLightPreview);
+        s.ModernLiquidDark = CurrentColorHex(LiquidDarkPreview);
+        s.ModernLiquidBright = CurrentColorHex(LiquidBrightPreview);
         s.OutlineThickness = OutlineThicknessSlider.Value;
         s.ShowDate = ShowDateCheck.IsChecked == true;
         s.Topmost = TopmostCheck.IsChecked == true;

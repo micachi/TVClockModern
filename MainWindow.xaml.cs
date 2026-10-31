@@ -153,6 +153,10 @@ public partial class MainWindow : Window
             FontFamily = new FontFamily(string.IsNullOrWhiteSpace(s.FontFamily) ? "Yu Gothic UI" : s.FontFamily),
             Weight = StrokeText.ParseWeight(s.FontWeight),
             TextSize = Math.Max(12, s.FontSize),
+            SweepDarkColor = s.ModernSweepDark,
+            SweepLightColor = s.ModernSweepLight,
+            LiquidDarkColor = s.ModernLiquidDark,
+            LiquidBrightColor = s.ModernLiquidBright,
         };
         _timeLayers.Host.Children.Add(_modernView);
 
@@ -190,6 +194,13 @@ public partial class MainWindow : Window
             var fmt = s.TimeFormat ?? "HH:mm";
             if (fmt.IndexOf('s') >= 0 || fmt.IndexOf('S') >= 0) fmt = "HH:mm";
             v.TimeText = SafeTimeText(now, fmt, v.TimeText);
+
+            // リキッドは「分の文字だけ」を変化させるため、時/分/後に分割して渡す
+            var (prefix, minute, suffix) = ModernClockMath.SplitMinute(now, fmt);
+            v.TimePrefix = prefix;
+            v.TimeMinute = minute;
+            v.TimeSuffix = suffix;
+
             v.DateText = string.IsNullOrWhiteSpace(s.DateFormat) || !s.ShowDate
                 ? ""
                 : SafeTimeText(now, s.DateFormat, v.DateText);

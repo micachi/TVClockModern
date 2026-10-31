@@ -26,6 +26,8 @@
   "label.timeFormat": "시간 형식",
   "label.displayMode": "표시 모드",
   "label.modernTheme": "모던 테마",
+  "label.sweepColors": "스윕 색(진한색 / 연한색)",
+  "label.liquidColors": "리퀴드 색(어두운색 / 밝은색)",
   "mode.classic": "클래식(숫자 표시)",
   "mode.modern": "모던(색 변화로 초 표현)",
   "theme.sweep": "스윕(이중 원)",

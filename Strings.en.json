@@ -26,6 +26,8 @@
   "label.timeFormat": "Time format",
   "label.displayMode": "Display mode",
   "label.modernTheme": "Modern theme",
+  "label.sweepColors": "Sweep colours (dark / light)",
+  "label.liquidColors": "Liquid colours (dark / bright)",
   "mode.classic": "Classic (digits)",
   "mode.modern": "Modern (seconds by colour)",
   "theme.sweep": "Sweep (double circle)",

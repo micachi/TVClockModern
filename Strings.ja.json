@@ -26,6 +26,8 @@
   "label.timeFormat": "時刻フォーマット",
   "label.displayMode": "表示モード",
   "label.modernTheme": "モダンテーマ",
+  "label.sweepColors": "スイープの色 (濃い色 / 薄い色)",
+  "label.liquidColors": "リキッドの色 (暗い色 / 明るい色)",
   "mode.classic": "クラシック (数字で表示)",
   "mode.modern": "モダン (色の変化で秒を表す)",
   "theme.sweep": "スイープ (二重円)",
