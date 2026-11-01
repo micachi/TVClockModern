@@ -50,12 +50,9 @@ public partial class SettingsWindow : Window
         lblTimeFormat.Text = L.T("label.timeFormat");
         lblDisplayMode.Text = L.T("label.displayMode");
         lblModernTheme.Text = L.T("label.modernTheme");
-        lblSweepColors.Text = L.T("label.sweepColors");
-        lblLiquidColors.Text = L.T("label.liquidColors");
-        SweepDarkButton.Content = L.T("btn.pick");
-        SweepLightButton.Content = L.T("btn.pick");
-        LiquidDarkButton.Content = L.T("btn.pick");
-        LiquidBrightButton.Content = L.T("btn.pick");
+        lblModernColors.Text = L.T("label.modernColors");
+        ModernDarkButton.Content = L.T("btn.pick");
+        ModernLightButton.Content = L.T("btn.pick");
         lblDateFormat.Text = L.T("label.dateFormat");
         ShowDateCheck.Content = L.T("check.showDate");
         lblTransitionEffect.Text = L.T("label.transitionEffect");
@@ -326,10 +323,8 @@ public partial class SettingsWindow : Window
         UpdateColorPreview(ColorPreview, s.TextColor);
         UpdateColorPreview(OutlineColorPreview, s.OutlineColor);
         UpdateColorPreview(PreviewBgPreview, s.PreviewBackground);
-        UpdateColorPreview(SweepDarkPreview, s.ModernSweepDark);
-        UpdateColorPreview(SweepLightPreview, s.ModernSweepLight);
-        UpdateColorPreview(LiquidDarkPreview, s.ModernLiquidDark);
-        UpdateColorPreview(LiquidBrightPreview, s.ModernLiquidBright);
+        UpdateColorPreview(ModernDarkPreview, s.ModernDark);
+        UpdateColorPreview(ModernLightPreview, s.ModernLight);
         UpdatePreviewBackground(s.PreviewBackground);
         UpdatePreview();
     }
@@ -344,11 +339,9 @@ public partial class SettingsWindow : Window
         }
     }
 
-    // ---------- モダンテーマの色 ----------
-    private void OnPickSweepDark(object sender, RoutedEventArgs e) => PickInto(SweepDarkPreview);
-    private void OnPickSweepLight(object sender, RoutedEventArgs e) => PickInto(SweepLightPreview);
-    private void OnPickLiquidDark(object sender, RoutedEventArgs e) => PickInto(LiquidDarkPreview);
-    private void OnPickLiquidBright(object sender, RoutedEventArgs e) => PickInto(LiquidBrightPreview);
+    // ---------- モダンの色(両テーマ共通) ----------
+    private void OnPickModernDark(object sender, RoutedEventArgs e) => PickInto(ModernDarkPreview);
+    private void OnPickModernLight(object sender, RoutedEventArgs e) => PickInto(ModernLightPreview);
 
     private void PickInto(Rectangle swatch)
     {
@@ -456,10 +449,8 @@ public partial class SettingsWindow : Window
                 TimeMinute = min,
                 TimeSuffix = sfx,
                 DateText = dateStr,
-                SweepDarkColor = CurrentColorHex(SweepDarkPreview),
-                SweepLightColor = CurrentColorHex(SweepLightPreview),
-                LiquidDarkColor = CurrentColorHex(LiquidDarkPreview),
-                LiquidBrightColor = CurrentColorHex(LiquidBrightPreview),
+                ModernDarkColor = CurrentColorHex(ModernDarkPreview),
+                ModernLightColor = CurrentColorHex(ModernLightPreview),
                 Fraction = ModernClockMath.Fraction(now),
                 Rollover = ModernClockMath.Rollover(now.Second + now.Millisecond / 1000.0,
                     string.Equals(theme, "liquid", StringComparison.OrdinalIgnoreCase) ? 0.45 : 0.7),
@@ -649,10 +640,8 @@ public partial class SettingsWindow : Window
         s.ShadowOpacity = ShadowOpacitySlider.Value;
         s.OutlineEnabled = OutlineCheck.IsChecked == true;
         s.OutlineColor = CurrentColorHex(OutlineColorPreview);
-        s.ModernSweepDark = CurrentColorHex(SweepDarkPreview);
-        s.ModernSweepLight = CurrentColorHex(SweepLightPreview);
-        s.ModernLiquidDark = CurrentColorHex(LiquidDarkPreview);
-        s.ModernLiquidBright = CurrentColorHex(LiquidBrightPreview);
+        s.ModernDark = CurrentColorHex(ModernDarkPreview);
+        s.ModernLight = CurrentColorHex(ModernLightPreview);
         s.OutlineThickness = OutlineThicknessSlider.Value;
         s.ShowDate = ShowDateCheck.IsChecked == true;
         s.Topmost = TopmostCheck.IsChecked == true;
@@ -816,10 +805,8 @@ public partial class SettingsWindow : Window
 
         lblModernTheme.Visibility = v;
         ThemeBox.Visibility = v;
-        lblSweepColors.Visibility = v;
-        SweepColorRow.Visibility = v;
-        lblLiquidColors.Visibility = v;
-        LiquidColorRow.Visibility = v;
+        lblModernColors.Visibility = v;
+        ModernColorRow.Visibility = v;
     }
 
     private void OnPreviewChanged(object sender, RoutedPropertyChangedEventArgs<double> e)

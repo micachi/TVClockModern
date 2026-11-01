@@ -102,7 +102,7 @@ The number to the right of each slider is an input field. Type a value and press
   - **Liquid (rising level)**: no background. Only the **minute digits** fill from dark to bright like a rising liquid level (0s = dark / 59s = bright). The hour, separators and date keep a fixed colour
 - Format (hour/minute), date, font and bold still apply in modern mode. Seconds specifiers are ignored
 - Text colour, outline, shadow and transition effects are not used in modern mode (each theme has its own palette)
-- Theme colours are selectable: Sweep (dark / light) and Liquid (dark / bright)
+- One colour pair is shared by both themes ("Modern colours (dark / light)"): Sweep uses the dark colour for the ring and wedge and the light colour for the inner disc; Liquid uses the dark colour at 0s and the light colour for the fixed text and at 59s
 - The theme and colour settings are shown only while modern mode is selected
 - The font size controls the circle size (Sweep) or the text size (Liquid)
 

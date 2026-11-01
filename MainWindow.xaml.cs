@@ -153,10 +153,8 @@ public partial class MainWindow : Window
             FontFamily = new FontFamily(string.IsNullOrWhiteSpace(s.FontFamily) ? "Yu Gothic UI" : s.FontFamily),
             Weight = StrokeText.ParseWeight(s.FontWeight),
             TextSize = Math.Max(12, s.FontSize),
-            SweepDarkColor = s.ModernSweepDark,
-            SweepLightColor = s.ModernSweepLight,
-            LiquidDarkColor = s.ModernLiquidDark,
-            LiquidBrightColor = s.ModernLiquidBright,
+            ModernDarkColor = s.ModernDark,
+            ModernLightColor = s.ModernLight,
         };
         _timeLayers.Host.Children.Add(_modernView);
 

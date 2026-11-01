@@ -114,14 +114,10 @@ public sealed class ClockSettings
     public string DisplayMode { get; set; } = "classic";
     /// <summary>モダンテーマ: sweep(二重円の扇形) / liquid(液面)</summary>
     public string ModernTheme { get; set; } = "sweep";
-    /// <summary>スイープの濃い色(外円・扇形)</summary>
-    public string ModernSweepDark { get; set; } = "#FF7C2D12";
-    /// <summary>スイープの薄い色(内円)</summary>
-    public string ModernSweepLight { get; set; } = "#FFF59E0B";
-    /// <summary>リキッドの暗い色(0秒側の文字)</summary>
-    public string ModernLiquidDark { get; set; } = "#FF8C2B2B";
-    /// <summary>リキッドの明るい色(59秒側の文字)</summary>
-    public string ModernLiquidBright { get; set; } = "#FFFFFFFF";
+    /// <summary>モダンの濃い色(スイープの外円・扇形 / リキッドの0秒側の文字)</summary>
+    public string ModernDark { get; set; } = "#FF7C2D12";
+    /// <summary>モダンの明るい色(スイープの内円 / リキッドの固定色・59秒側の文字)</summary>
+    public string ModernLight { get; set; } = "#FFF59E0B";
     /// <summary>起動時に更新を確認する</summary>
     public bool CheckUpdates { get; set; } = true;
     /// <summary>最終更新確認時刻 (UTC, ISO 8601)。空または不正値=未確認</summary>
@@ -254,10 +250,8 @@ public sealed class ClockSettings
         if (!validModes.Contains(DisplayMode)) DisplayMode = "classic";
         var validThemes = new[] { "sweep", "liquid" };
         if (!validThemes.Contains(ModernTheme)) ModernTheme = "sweep";
-        ModernSweepDark = ValidColor(ModernSweepDark, "#FF7C2D12");
-        ModernSweepLight = ValidColor(ModernSweepLight, "#FFF59E0B");
-        ModernLiquidDark = ValidColor(ModernLiquidDark, "#FF8C2B2B");
-        ModernLiquidBright = ValidColor(ModernLiquidBright, "#FFFFFFFF");
+        ModernDark = ValidColor(ModernDark, "#FF7C2D12");
+        ModernLight = ValidColor(ModernLight, "#FFF59E0B");
         var validEffects = new[] { "none", "flipx", "flipy", "slideup", "slidedown", "fade", "crossfade" };
         if (!validEffects.Contains(TransitionEffect)) TransitionEffect = "crossfade";
 

@@ -64,22 +64,14 @@ public sealed class ModernClockView : FrameworkElement
         nameof(Rollover), typeof(double), typeof(ModernClockView),
         new FrameworkPropertyMetadata(0.0, FrameworkPropertyMetadataOptions.AffectsRender));
 
-    // --- テーマの色(ユーザー選択) ---
-    public static readonly DependencyProperty SweepDarkColorProperty = DependencyProperty.Register(
-        nameof(SweepDarkColor), typeof(string), typeof(ModernClockView),
+    // --- モダンの色(両テーマ共通) ---
+    public static readonly DependencyProperty ModernDarkColorProperty = DependencyProperty.Register(
+        nameof(ModernDarkColor), typeof(string), typeof(ModernClockView),
         new FrameworkPropertyMetadata("#FF7C2D12", FrameworkPropertyMetadataOptions.AffectsRender));
 
-    public static readonly DependencyProperty SweepLightColorProperty = DependencyProperty.Register(
-        nameof(SweepLightColor), typeof(string), typeof(ModernClockView),
+    public static readonly DependencyProperty ModernLightColorProperty = DependencyProperty.Register(
+        nameof(ModernLightColor), typeof(string), typeof(ModernClockView),
         new FrameworkPropertyMetadata("#FFF59E0B", FrameworkPropertyMetadataOptions.AffectsRender));
-
-    public static readonly DependencyProperty LiquidDarkColorProperty = DependencyProperty.Register(
-        nameof(LiquidDarkColor), typeof(string), typeof(ModernClockView),
-        new FrameworkPropertyMetadata("#FF8C2B2B", FrameworkPropertyMetadataOptions.AffectsRender));
-
-    public static readonly DependencyProperty LiquidBrightColorProperty = DependencyProperty.Register(
-        nameof(LiquidBrightColor), typeof(string), typeof(ModernClockView),
-        new FrameworkPropertyMetadata("#FFFFFFFF", FrameworkPropertyMetadataOptions.AffectsRender));
 
     public string TimeText { get => (string)GetValue(TimeTextProperty); set => SetValue(TimeTextProperty, value); }
     public string TimePrefix { get => (string)GetValue(TimePrefixProperty); set => SetValue(TimePrefixProperty, value); }
@@ -92,10 +84,8 @@ public sealed class ModernClockView : FrameworkElement
     public double TextSize { get => (double)GetValue(TextSizeProperty); set => SetValue(TextSizeProperty, value); }
     public double Fraction { get => (double)GetValue(FractionProperty); set => SetValue(FractionProperty, value); }
     public double Rollover { get => (double)GetValue(RolloverProperty); set => SetValue(RolloverProperty, value); }
-    public string SweepDarkColor { get => (string)GetValue(SweepDarkColorProperty); set => SetValue(SweepDarkColorProperty, value); }
-    public string SweepLightColor { get => (string)GetValue(SweepLightColorProperty); set => SetValue(SweepLightColorProperty, value); }
-    public string LiquidDarkColor { get => (string)GetValue(LiquidDarkColorProperty); set => SetValue(LiquidDarkColorProperty, value); }
-    public string LiquidBrightColor { get => (string)GetValue(LiquidBrightColorProperty); set => SetValue(LiquidBrightColorProperty, value); }
+    public string ModernDarkColor { get => (string)GetValue(ModernDarkColorProperty); set => SetValue(ModernDarkColorProperty, value); }
+    public string ModernLightColor { get => (string)GetValue(ModernLightColorProperty); set => SetValue(ModernLightColorProperty, value); }
 
     private bool IsLiquid => string.Equals(Theme, "liquid", StringComparison.OrdinalIgnoreCase);
 
@@ -185,8 +175,8 @@ public sealed class ModernClockView : FrameworkElement
     // ---------- sweep(二重円 + 扇形の広がり) ----------
     private void DrawSweep(DrawingContext dc, Point c, double r)
     {
-        var deep = ParseColor(SweepDarkColor, Color.FromRgb(0x7C, 0x2D, 0x12));
-        var light = ParseColor(SweepLightColor, Color.FromRgb(0xF5, 0x9E, 0x0B));
+        var deep = ParseColor(ModernDarkColor, Color.FromRgb(0x7C, 0x2D, 0x12));
+        var light = ParseColor(ModernLightColor, Color.FromRgb(0xF5, 0x9E, 0x0B));
 
         dc.DrawEllipse(Frozen(deep), null, c, r, r);
 
@@ -266,8 +256,8 @@ public sealed class ModernClockView : FrameworkElement
     // ---------- liquid(背景なし・分の文字だけが液面のように満ちる) ----------
     private void DrawLiquidText(DrawingContext dc)
     {
-        var dark = ParseColor(LiquidDarkColor, Color.FromRgb(0x8C, 0x2B, 0x2B));
-        var bright = ParseColor(LiquidBrightColor, Colors.White);
+        var dark = ParseColor(ModernDarkColor, Color.FromRgb(0x7C, 0x2D, 0x12));
+        var bright = ParseColor(ModernLightColor, Color.FromRgb(0xF5, 0x9E, 0x0B));
 
         var dpi = VisualTreeHelper.GetDpi(this).PixelsPerDip;
         var timeSize = Math.Max(8, TextSize);
